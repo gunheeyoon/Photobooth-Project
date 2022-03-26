@@ -109,6 +109,8 @@ export default class Lab2App extends cs380.BaseApp {
 
     const T = this.star.transform;
     quat.rotateZ(T.localRotation, T.localRotation, Math.PI * dt);
+    
+    
     const angle = Math.PI * elapsed;
     vec3.set(
       this.star.transform.localPosition,
@@ -116,6 +118,8 @@ export default class Lab2App extends cs380.BaseApp {
       Math.sin(angle),
       0
     );
+    
+    
 
     // Clear canvas
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
