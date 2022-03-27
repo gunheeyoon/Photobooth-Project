@@ -37,7 +37,6 @@ export default class Assignment1 extends cs380.BaseApp {
     this.mesh = new cs380.Mesh();
 
     const buildBackground = () => {
-      this.mesh.finalize();
       this.mesh.addAttribute(3); //position
       this.mesh.addAttribute(3); //color
       const triangle1 = [
@@ -103,7 +102,7 @@ export default class Assignment1 extends cs380.BaseApp {
 
     /* fractal 2 */
 
-    this.fractalDepth = 2;
+    this.fractalDepth = 13;
     this.fractalNum = Math.pow(2, this.fractalDepth) - 1;
     this.meshFractalArray  = [];
     for (let i = 0; i < this.fractalNum; i++) {
@@ -125,42 +124,47 @@ export default class Assignment1 extends cs380.BaseApp {
 
     const buildFractal = () => {
 
-      const coordinate = [0.2, 0, 0, -0.2, 0, 0, -0.2, -2, 0, 0.2, -2, 0];
-      
-      makeRectangle(coordinate, this.meshFractalArray[0]);
-      const fractal = new cs380.RenderObject(this.meshFractalArray[0], this.shader2);
-      fractal.uniforms.mainColor = [224/255, 58/255, 23/255];
-      this.fractalArray.push(fractal);
+      const coordinate = [0.05, -0.7, 0, -0.05, -0.7, 0, -0.05, -2, 0, 0.05, -2, 0];
 
-      const recursion = (rec, coordinate) => {
-        if (rec != 0) {
-          makeRectangle(coordinate, this.meshFractalArray[1]);
-          makeRectangle(coordinate, this.meshFractalArray[2]);
-          
-          const fractal1 = new cs380.RenderObject(this.meshFractalArray[1], this.shader2);
-          const fractal2 = new cs380.RenderObject(this.meshFractalArray[2], this.shader2);
+      for (let i = 0; i < this.fractalNum; i++) {
+        makeRectangle(coordinate, this.meshFractalArray[i]);
+        const fractal = new cs380.RenderObject(this.meshFractalArray[i], this.shader2);
+        fractal.uniforms.mainColor = [206/255, 222/255, 60/255];
+        this.fractalArray.push(fractal);
+      }
 
-          vec3.set(fractal1.transform.localPosition, fractal1.transform.localPosition[0], fractal1.transform.localPosition[1], 0);
-          vec3.set(fractal2.transform.localPosition, fractal2.transform.localPosition[0], fractal2.transform.localPosition[1], 0);
+      const recursion = (rec, start, finish) => {
+        if (rec > 0) {
+          const mid = Math.floor((start + finish) / 2);
 
-          quat.rotateZ(fractal1.transform.localRotation, fractal1.transform.localRotation, -45 * Math.PI / 180);
-          quat.rotateZ(fractal2.transform.localRotation, fractal2.transform.localRotation, 45 * Math.PI / 180);
+          for(let i = start; i < mid + 1; i++) {
+            const T1 = this.fractalArray[i].transform;
+            vec3.set(T1.localPosition, T1.localPosition[0], T1.localPosition[1], 0);
+            quat.rotateZ(T1.localRotation, T1.localRotation, -155 * Math.PI / 180);
+            vec3.scale(T1.localScale, T1.localScale, 0.9);
+          }
+          for(let j = mid + 1; j < finish + 1; j++) {
+            const T2 = this.fractalArray[j].transform;
+            vec3.set(T2.localPosition, T2.localPosition[0], T2.localPosition[1], 0);
+            quat.rotateZ(T2.localRotation, T2.localRotation, 125 * Math.PI / 180);
+            vec3.scale(T2.localScale, T2.localScale, 0.9);
+          }
 
-          fractal1.uniforms.mainColor = [224/255, 58/255, 23/255];
-          this.fractalArray.push(fractal1);
-          fractal2.uniforms.mainColor = [224/255, 58/255, 23/255];
-          this.fractalArray.push(fractal2);
+          recursion(rec - 1, start + 1, mid);
+          recursion(rec - 1, mid + 2, finish);
         }
         else {
 
         }
       }
 
-      recursion(this.fractalDepth, coordinate);
-      
+      recursion(this.fractalDepth, 1, this.fractalNum - 1);
     }
 
     buildFractal();
+
+    /* koch snowflake */
+    
 
   }
 
@@ -168,6 +172,8 @@ export default class Assignment1 extends cs380.BaseApp {
     // Finalize WebGL objects (mesh, shader, texture, ...)
     this.mesh.finalize();
     this.shader.finalize();
+    this.shader1.finalize();
+    this.shader2.finalize();
 
     for (let i = 0; i < this.numOfFractal1; i++) {
       this.meshArray[i].finalize();
@@ -198,7 +204,7 @@ export default class Assignment1 extends cs380.BaseApp {
     for (let i = 0; i < this.numOfFractal1; i++) {
       this.starArray[i].render(this.camera);
     }
-    for (let j = 0; j < this.fractalNum; j++) {
+    for (let j = 1; j < this.fractalNum; j++) {
       this.fractalArray[j].render(this.camera);
     }
   }
