@@ -22,11 +22,37 @@ export default class Assignment2 extends cs380.BaseApp {
 
     this.thingsToClear = [];
 
+    // SimpleOrbitControl
+    const orbitControlCenter = vec3.fromValues(0, 0, 0);
+    this.simpleOrbitControl = new cs380.utils.SimpleOrbitControl(
+      this.camera,
+      orbitControlCenter
+    );
+    this.thingsToClear.push(this.simpleOrbitControl);
+
+    // simpleSahder
+    const simpleShader = await cs380.buildShader(SimpleShader);
+    this.thingsToClear.push(simpleShader);
+
+    // cone mesh
+    const coneMeshData = cs380.primitives.generateCone();
+    const coneMesh = cs380.Mesh.fromData(coneMeshData);
+    this.thingsToClear.push(coneMesh);
+
+    // sphere mesh
+    const sphereMeshdata = cs380.primitives.generateSphere();
+    const sphereMesh = cs380.Mesh.fromData(sphereMeshdata);
+    this.thingsToClear.push(sphereMesh);
+
     // initialize picking shader & buffer
     const pickingShader = await cs380.buildShader(cs380.PickingShader);
     this.pickingBuffer = new cs380.PickingBuffer();
     this.pickingBuffer.initialize(width, height);
     this.thingsToClear.push(pickingShader, this.pickingBuffer);
+
+    // initialize objects
+    this.cone = new cs380.PickableObject(coneMesh, simpleShader, pickingShader, 1);
+    this.sphere = new cs380.PickableObject(sphereMesh, simpleShader, pickingShader, 2);
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -84,6 +110,7 @@ export default class Assignment2 extends cs380.BaseApp {
 
   update(elapsed, dt) {
     // Updates before rendering here
+    this.simpleOrbitControl.update(dt);
 
     // Render picking information first
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingBuffer.fbo);
@@ -94,6 +121,8 @@ export default class Assignment2 extends cs380.BaseApp {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // renderPicking() here
+    this.cone.renderPicking(this.camera);
+    //this.sphere.renderPicking(this.camera);
 
     // Render real scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -104,5 +133,7 @@ export default class Assignment2 extends cs380.BaseApp {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // render() here
+    this.cone.render(this.camera);
+    //this.sphere.render(this.camera);
   }
 }

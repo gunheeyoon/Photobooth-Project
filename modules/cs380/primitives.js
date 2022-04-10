@@ -218,6 +218,41 @@ export function generateCone(sides = 16, radius = 1, height = 1) {
 
   // TODO: Implement cone generation
 
+  let index = 0;
+
+  const addTri = (p0, p1, p2) => {
+    data.vertices.push(...p0, ...p1, ...p2);
+    // data.vertexNormals.push(...p0, ...p1, ...p2);
+    //data.indices.push(index++);
+  };
+
+  // bottom face
+  for (let i = 0; i < sides; i++) {
+    const p0 = [0, 0, 0];
+    const p1 = [radius * Math.cos(i * 2 * Math.PI / sides), 0, radius * Math.sin(i * 2 * Math.PI / sides)];
+    const p2 = [radius * Math.cos((i+1) * 2 * Math.PI / sides), 0, radius * Math.sin((i+1) * 2 * Math.PI / sides)];
+
+    addTri(p0, p1, p2);
+    data.vertexNormals.push(0, 0, -1, 0, 0, -1, 0, 0, -1);
+  }
+
+  // the other faces
+  for (let i = 0; i < sides; i++) {
+    const p0 = [0, height, 0];
+    const p1 = [radius * Math.cos(((i+1) / sides) * 2 * Math.PI), 0, radius * Math.sin(((i+1) / sides) * 2 * Math.PI)];
+    const p2 = [radius * Math.cos((i / sides) * 2 * Math.PI), 0, radius * Math.sin((i / sides) * 2 * Math.PI)];
+
+    let v1 = vec3.fromValues(radius * Math.cos(((i+1) / sides) * 2 * Math.PI), -height, radius * Math.sin(((i+1) / sides) * 2 * Math.PI));
+    let v2 = vec3.fromValues(radius * Math.cos((i / sides) * 2 * Math.PI), -height, radius * Math.sin((i / sides) * 2 * Math.PI));
+    let v = vec3.create();
+
+    vec3.multiply(v, v1, v2);
+
+    addTri(p0, p1, p2);
+    data.vertexNormals.push(...v, ...v, ...v);
+  }
+  
+
   return data;
 }
 
@@ -230,6 +265,16 @@ export function generateCylinder(sides = 16, radius = 1, height = 1) {
   };
 
   // TODO: Implement cylinder generation
+
+  const addTri = (p0, p1, p2) => {
+    data.vertices.push(...p0, ...p1, ...p2);
+    data.vertexNormals.push(...p0, ...p1, ...p2);
+  };
+
+  const addQaud = (p0, p1, p2, p3) => {
+    addTri(p0, p1, p2);
+    addTri(p0, p2, p3);
+  };
 
   return data;
 }
