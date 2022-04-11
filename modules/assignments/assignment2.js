@@ -35,7 +35,7 @@ export default class Assignment2 extends cs380.BaseApp {
     this.thingsToClear.push(simpleShader);
 
     // cone mesh
-    const coneMeshData = cs380.primitives.generateCone();
+    const coneMeshData = cs380.primitives.generateCone(64, 0.8, 1);
     const coneMesh = cs380.Mesh.fromData(coneMeshData);
     this.thingsToClear.push(coneMesh);
 
@@ -43,6 +43,11 @@ export default class Assignment2 extends cs380.BaseApp {
     const sphereMeshdata = cs380.primitives.generateSphere();
     const sphereMesh = cs380.Mesh.fromData(sphereMeshdata);
     this.thingsToClear.push(sphereMesh);
+
+    // cylinder mesh
+    const cylinderMeshData = cs380.primitives.generateCylinder(64, 0.8, 1);
+    const cylinderMesh = cs380.Mesh.fromData(cylinderMeshData);
+    this.thingsToClear.push(cylinderMesh);
 
     // initialize picking shader & buffer
     const pickingShader = await cs380.buildShader(cs380.PickingShader);
@@ -53,6 +58,13 @@ export default class Assignment2 extends cs380.BaseApp {
     // initialize objects
     this.cone = new cs380.PickableObject(coneMesh, simpleShader, pickingShader, 1);
     this.sphere = new cs380.PickableObject(sphereMesh, simpleShader, pickingShader, 2);
+    this.cylinder = new cs380.PickableObject(cylinderMesh, simpleShader, pickingShader, 3);
+
+    // move around the objects
+    let CONE = this.cone.transform;
+    let CYLI = this.cylinder.transform;
+    vec3.set(CONE.localPosition, -1, -0.5, 0);
+    vec3.set(CYLI.localPosition, 1, -0.5, 0);
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -123,6 +135,7 @@ export default class Assignment2 extends cs380.BaseApp {
     // renderPicking() here
     this.cone.renderPicking(this.camera);
     //this.sphere.renderPicking(this.camera);
+    this.cylinder.renderPicking(this.camera);
 
     // Render real scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -135,5 +148,6 @@ export default class Assignment2 extends cs380.BaseApp {
     // render() here
     this.cone.render(this.camera);
     //this.sphere.render(this.camera);
+    this.cylinder.render(this.camera);
   }
 }

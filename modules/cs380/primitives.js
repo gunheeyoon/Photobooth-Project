@@ -246,7 +246,8 @@ export function generateCone(sides = 16, radius = 1, height = 1) {
     let v2 = vec3.fromValues(radius * Math.cos((i / sides) * 2 * Math.PI), -height, radius * Math.sin((i / sides) * 2 * Math.PI));
     let v = vec3.create();
 
-    vec3.multiply(v, v1, v2);
+    vec3.cross(v, v1, v2);
+    vec3.normalize(v, v);
 
     addTri(p0, p1, p2);
     data.vertexNormals.push(...v, ...v, ...v);
@@ -268,13 +269,60 @@ export function generateCylinder(sides = 16, radius = 1, height = 1) {
 
   const addTri = (p0, p1, p2) => {
     data.vertices.push(...p0, ...p1, ...p2);
-    data.vertexNormals.push(...p0, ...p1, ...p2);
+    //data.vertexNormals.push(...p0, ...p1, ...p2);
   };
 
-  const addQaud = (p0, p1, p2, p3) => {
+  const addQuad = (p0, p1, p2, p3) => {
     addTri(p0, p1, p2);
     addTri(p0, p2, p3);
   };
+
+  // bottom face
+  for (let i = 0; i < sides; i++) {
+    const p0 = [0, 0, 0];
+    const p1 = [radius * Math.cos(i * 2 * Math.PI / sides), 0, radius * Math.sin(i * 2 * Math.PI / sides)];
+    const p2 = [radius * Math.cos((i+1) * 2 * Math.PI / sides), 0, radius * Math.sin((i+1) * 2 * Math.PI / sides)];
+
+    addTri(p0, p1, p2);
+    data.vertexNormals.push(0, 0, -1, 0, 0, -1, 0, 0, -1);
+  }
+
+  // top face
+  for (let i = 0; i < sides; i++) {
+    const p0 = [0, height, 0];
+    const p1 = [radius * Math.cos((i+1) * 2 * Math.PI / sides), height, radius * Math.sin((i+1) * 2 * Math.PI / sides)];
+    const p2 = [radius * Math.cos(i * 2 * Math.PI / sides), height, radius * Math.sin(i * 2 * Math.PI / sides)];
+
+    addTri(p0, p1, p2);
+    data.vertexNormals.push(0, 0, 1, 0, 0, 1, 0, 0, 1);
+  }
+
+  // side faces
+  for (let i = 0; i < sides; i++) {
+    const p0 = [radius * Math.cos((i+1) * 2 * Math.PI / sides), height, radius * Math.sin((i+1) * 2 * Math.PI / sides)];
+    const p1 = [radius * Math.cos((i+1) * 2 * Math.PI / sides), 0, radius * Math.sin((i+1) * 2 * Math.PI / sides)];
+    const p2 = [radius * Math.cos(i * 2 * Math.PI / sides), 0, radius * Math.sin(i * 2 * Math.PI / sides)];
+    const p3 = [radius * Math.cos(i * 2 * Math.PI / sides), height, radius * Math.sin(i * 2 * Math.PI / sides)];
+
+    let vp0 = vec3.fromValues(...p0);
+    let vp1 = vec3.fromValues(...p1);
+    let vp3 = vec3.fromValues(...p3);
+
+    let v1 = vec3.create();
+    let v2 = vec3.create();
+
+    vec3.subtract(v1, vp1, vp0);
+    vec3.subtract(v2, vp3, vp0);
+
+    let v = vec3.create();
+
+    vec3.cross(v, v1, v2);
+    vec3.normalize(v, v);
+
+    addQuad(p0, p1, p2, p3);
+    data.vertexNormals.push(...v, ...v, ...v, ...v ,...v, ...v);
+  }
+
 
   return data;
 }
