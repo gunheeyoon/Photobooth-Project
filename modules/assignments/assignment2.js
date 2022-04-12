@@ -56,15 +56,39 @@ export default class Assignment2 extends cs380.BaseApp {
     this.thingsToClear.push(pickingShader, this.pickingBuffer);
 
     // initialize objects
-    this.cone = new cs380.PickableObject(coneMesh, simpleShader, pickingShader, 1);
-    this.sphere = new cs380.PickableObject(sphereMesh, simpleShader, pickingShader, 2);
-    this.cylinder = new cs380.PickableObject(cylinderMesh, simpleShader, pickingShader, 3);
+    this.cone = new cs380.PickableObject(
+      coneMesh,
+      simpleShader,
+      pickingShader,
+      1
+    );
+    this.sphere = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      2
+    );
+    this.cylinder = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      3
+    );
 
     // move around the objects
     let CONE = this.cone.transform;
     let CYLI = this.cylinder.transform;
+    let SPHE = this.sphere.transform;
+
+    SPHE.setParent(CONE);
+
     vec3.set(CONE.localPosition, -1, -0.5, 0);
     vec3.set(CYLI.localPosition, 1, -0.5, 0);
+
+    vec3.set(SPHE.localPosition, 0, 1, 0);
+    vec3.set(SPHE.localScale, 0.3, 0.3, 0.3);
+
+    quat.rotateZ(CONE.localRotation, CONE.localRotation, Math.PI / 4);
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -134,7 +158,7 @@ export default class Assignment2 extends cs380.BaseApp {
 
     // renderPicking() here
     this.cone.renderPicking(this.camera);
-    //this.sphere.renderPicking(this.camera);
+    this.sphere.renderPicking(this.camera);
     this.cylinder.renderPicking(this.camera);
 
     // Render real scene
@@ -147,7 +171,7 @@ export default class Assignment2 extends cs380.BaseApp {
 
     // render() here
     this.cone.render(this.camera);
-    //this.sphere.render(this.camera);
+    this.sphere.render(this.camera);
     this.cylinder.render(this.camera);
   }
 }
