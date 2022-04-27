@@ -56,6 +56,139 @@ export default class Assignment2 extends cs380.BaseApp {
     this.thingsToClear.push(pickingShader, this.pickingBuffer);
 
     // initialize objects
+    this.body = new cs380.PickableObject(
+      coneMesh,
+      simpleShader,
+      pickingShader,
+      1
+    );
+    this.head = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      2
+    );
+    this.rightShoulder = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      3
+    );
+    this.leftShoulder = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      4
+    );
+    this.rightUpperArm = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      5
+    );
+    this.leftUpperArm = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      6
+    );
+    this.rightArmJoint = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      7
+    );
+    this.leftArmJoint = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      8
+    );
+    this.rightLowerArm = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      9
+    );
+    this.leftLowerArm = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      10
+    );
+    this.rightHand = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      11
+    );
+    this.leftHand = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      12
+    );
+    this.rightHip = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      13
+    );
+    this.leftHip = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      14
+    );
+    this.rightUpperLeg = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      15
+    );
+    this.leftUpperLeg = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      16
+    );
+    this.rightLegJoint = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      17
+    );
+    this.leftLegJoint = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      18
+    );
+    this.rightLowerLeg = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      19
+    );
+    this.leftLowerLeg = new cs380.PickableObject(
+      cylinderMesh,
+      simpleShader,
+      pickingShader,
+      20
+    );
+    this.rightFoot = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      21
+    );
+    this.leftFoot = new cs380.PickableObject(
+      sphereMesh,
+      simpleShader,
+      pickingShader,
+      22
+    );
+
     this.cone = new cs380.PickableObject(
       coneMesh,
       simpleShader,
@@ -76,19 +209,61 @@ export default class Assignment2 extends cs380.BaseApp {
     );
 
     // move around the objects
-    let CONE = this.cone.transform;
-    let CYLI = this.cylinder.transform;
-    let SPHE = this.sphere.transform;
+    let BODY = this.body.transform;
+    let HEAD = this.head.transform;
+    let RS = this.rightShoulder.transform;
+    let LS = this.leftShoulder.transform;
+    let RUA = this.rightUpperArm.transform;
+    let LUA = this.leftUpperArm.transform;
+    let RAJ = this.rightArmJoint.transform;
+    let LAJ = this.leftArmJoint.transform;
+    let RLA = this.rightLowerArm.transform;
+    let LLA = this.leftLowerArm.transform;
+    let RHAND = this.rightHand.transform;
+    let LHAND = this.leftHand.transform;
+    let RHIP = this.rightHip.transform;
+    let LHIP = this.leftHip.transform;
+    let RUL = this.rightUpperLeg.transform;
+    let LUL = this.leftUpperLeg.transform;
+    let RLJ = this.rightLegJoint.transform;
+    let LLJ = this.leftLegJoint.transform;
+    let RLL = this.rightLowerLeg.transform;
+    let LLL = this.leftLowerLeg.transform;
+    let RF = this.rightFoot.transform;
+    let LF = this.leftFoot.transform;
 
-    SPHE.setParent(CONE);
+    // set initial position, scale, rotation
+    vec3.set(BODY.localScale, 0.5, 1, 1);
 
-    vec3.set(CONE.localPosition, -1, -0.5, 0);
-    vec3.set(CYLI.localPosition, 1, -0.5, 0);
+    vec3.set(HEAD.localPosition, 0, 1, 0);
+    vec3.set(HEAD.localScale, 0.3, 0.3, 0.3);
 
-    vec3.set(SPHE.localPosition, 0, 1, 0);
-    vec3.set(SPHE.localScale, 0.3, 0.3, 0.3);
+    // set hierarchy
+    HEAD.setParent(BODY); // parent of head is body
+    RS.setParent(BODY); // parent of right shoulder is body
+    LS.setParent(BODY); // parent of left shoulder is body
+    RHIP.setParent(BODY); // parent of right hip is body
+    LHIP.setParent(BODY); // parent of left hip is body
 
-    quat.rotateZ(CONE.localRotation, CONE.localRotation, Math.PI / 4);
+    RUA.setParent(RS); // parent of right upper arm is right shoulder
+    LUA.setParent(LS); // parent of left upper arm is left shoulder
+    RAJ.setParent(RUA); // parent of right arm joint is right upper arm
+    LAJ.setParent(LUA); // parent of left arm joint is left upper arm
+    RLA.setParent(RAJ); // parent of right lower arm is right arm joint
+    LLA.setParent(LAJ); // parent of left lower arm is left arm joint
+    RHAND.setParent(RLA); // parent of right hand is right lower arm
+    LHAND.setParent(LLA); // parent of left hand is left lower arm
+
+    RUL.setParent(RHIP); // parent of right upper leg is right hip
+    LUL.setParent(LHIP); // parent of left upper leg is left hip
+    RLJ.setParent(RUL); // parent of right leg joint is right upper leg
+    LLJ.setParent(LUL); // parent of left leg joint is left upper leg
+    RLL.setParent(RLJ); // parent of right lower leg is right leg joint
+    LLL.setParent(LLJ); // parent of left lower leg is left leg joint
+    RF.setParent(RLL); // parent of right foot is right lower leg
+    LF.setParent(LLL); // parent of left foot is left lower leg
+
+    // set the remaining position, scale, rotation
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -157,9 +332,8 @@ export default class Assignment2 extends cs380.BaseApp {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // renderPicking() here
-    this.cone.renderPicking(this.camera);
-    this.sphere.renderPicking(this.camera);
-    this.cylinder.renderPicking(this.camera);
+    this.body.renderPicking(this.camera);
+    this.head.renderPicking(this.camera);
 
     // Render real scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -170,8 +344,7 @@ export default class Assignment2 extends cs380.BaseApp {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // render() here
-    this.cone.render(this.camera);
-    this.sphere.render(this.camera);
-    this.cylinder.render(this.camera);
+    this.body.render(this.camera);
+    this.head.render(this.camera);
   }
 }
