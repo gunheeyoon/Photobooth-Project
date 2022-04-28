@@ -277,6 +277,31 @@ export default class Assignment2 extends cs380.BaseApp {
     vec3.set(LLA.localScale, 200, 1400, 200);
     vec3.set(LLA.localPosition, 0, -1000, 0);
 
+    vec3.set(RHAND.localScale, 1 / 800, 1 / 9000, 1 / 800);
+    vec3.set(LHAND.localScale, 1 / 800, 1 / 9000, 1 / 800);
+
+    vec3.set(RHIP.localPosition, 0.2, -0.05, 0);
+    vec3.set(LHIP.localPosition, -0.2, -0.05, 0);
+
+    vec3.set(RHIP.localScale, 0.1, 0.1, 0.1);
+    vec3.set(LHIP.localScale, 0.1, 0.1, 0.1);
+
+    vec3.set(RUL.localPosition, 0, -30, 0);
+    vec3.set(LUL.localPosition, 0, -30, 0);
+    vec3.set(RUL.localScale, 25, 50, 25);
+    vec3.set(LUL.localScale, 25, 50, 25);
+
+    vec3.set(RLJ.localScale, 1 / 100, 1 / 400, 1 / 100);
+    vec3.set(LLJ.localScale, 1 / 100, 1 / 400, 1 / 100);
+
+    vec3.set(RLL.localPosition, 0, -1500, 0);
+    vec3.set(RLL.localScale, 350, 2000, 350);
+    vec3.set(LLL.localPosition, 0, -1500, 0);
+    vec3.set(LLL.localScale, 350, 2000, 350);
+
+    vec3.set(RF.localScale, 1 / 1500, 1 / 8000, 1 / 1500);
+    vec3.set(LF.localScale, 1 / 1500, 1 / 8000, 1 / 1500);
+
     vec3.set(this.cylinder.transform.localPosition, 1, 0, 0);
 
     // Event listener for interactions
@@ -313,6 +338,13 @@ export default class Assignment2 extends cs380.BaseApp {
 
   onKeyDown(key) {
     console.log(`key down: ${key}`);
+    if (key == "e") {
+      this.camera.transform.setParent(this.rightFoot.transform);
+      vec3.set(this.camera.transform.localPosition, 0, 0, 8);
+    } else {
+      this.camera.transform.setParent(null);
+      vec3.set(this.camera.transform.localPosition, 0, 0, 8);
+    }
   }
 
   onMouseDown(e) {
@@ -356,7 +388,13 @@ export default class Assignment2 extends cs380.BaseApp {
     this.leftArmJoint.renderPicking(this.camera);
     this.rightLowerArm.renderPicking(this.camera);
     this.leftLowerArm.renderPicking(this.camera);
-    this.cylinder.renderPicking(this.camera);
+    //this.rightHand.renderPicking(this.camera);
+    //this.leftHand.renderPicking(this.camera);
+    this.rightHip.renderPicking(this.camera);
+    this.leftHip.renderPicking(this.camera);
+    this.rightUpperLeg.renderPicking(this.camera);
+    this.leftUpperLeg.renderPicking(this.camera);
+    //this.cylinder.renderPicking(this.camera);
 
     // Render real scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -377,6 +415,18 @@ export default class Assignment2 extends cs380.BaseApp {
     this.leftArmJoint.render(this.camera);
     this.rightLowerArm.render(this.camera);
     this.leftLowerArm.render(this.camera);
-    this.cylinder.render(this.camera);
+    this.rightHand.render(this.camera);
+    this.leftHand.render(this.camera);
+    this.rightHip.render(this.camera);
+    this.leftHip.render(this.camera);
+    this.rightUpperLeg.render(this.camera);
+    this.leftUpperLeg.render(this.camera);
+    this.rightLegJoint.render(this.camera);
+    this.leftLegJoint.render(this.camera);
+    this.rightLowerLeg.render(this.camera);
+    this.leftLowerLeg.render(this.camera);
+    this.leftFoot.render(this.camera);
+    this.rightFoot.render(this.camera);
+    //this.cylinder.render(this.camera);
   }
 }
