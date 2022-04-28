@@ -39,13 +39,18 @@ export default class Assignment2 extends cs380.BaseApp {
     const coneMesh = cs380.Mesh.fromData(coneMeshData);
     this.thingsToClear.push(coneMesh);
 
+    // body mesh
+    const bodyMeshData = cs380.primitives.generateCone(32, 0.5, 1);
+    const bodyMesh = cs380.Mesh.fromData(bodyMeshData);
+    this.thingsToClear.push(bodyMesh);
+
     // sphere mesh
     const sphereMeshdata = cs380.primitives.generateSphere();
     const sphereMesh = cs380.Mesh.fromData(sphereMeshdata);
     this.thingsToClear.push(sphereMesh);
 
     // cylinder mesh
-    const cylinderMeshData = cs380.primitives.generateCylinder(64, 0.8, 1);
+    const cylinderMeshData = cs380.primitives.generateCylinder(32, 0.2, 0.7);
     const cylinderMesh = cs380.Mesh.fromData(cylinderMeshData);
     this.thingsToClear.push(cylinderMesh);
 
@@ -57,7 +62,7 @@ export default class Assignment2 extends cs380.BaseApp {
 
     // initialize objects
     this.body = new cs380.PickableObject(
-      coneMesh,
+      bodyMesh,
       simpleShader,
       pickingShader,
       1
@@ -188,24 +193,11 @@ export default class Assignment2 extends cs380.BaseApp {
       pickingShader,
       22
     );
-
-    this.cone = new cs380.PickableObject(
-      coneMesh,
-      simpleShader,
-      pickingShader,
-      1
-    );
-    this.sphere = new cs380.PickableObject(
-      sphereMesh,
-      simpleShader,
-      pickingShader,
-      2
-    );
     this.cylinder = new cs380.PickableObject(
       cylinderMesh,
       simpleShader,
       pickingShader,
-      3
+      23
     );
 
     // move around the objects
@@ -231,12 +223,6 @@ export default class Assignment2 extends cs380.BaseApp {
     let LLL = this.leftLowerLeg.transform;
     let RF = this.rightFoot.transform;
     let LF = this.leftFoot.transform;
-
-    // set initial position, scale, rotation
-    vec3.set(BODY.localScale, 0.5, 1, 1);
-
-    vec3.set(HEAD.localPosition, 0, 1, 0);
-    vec3.set(HEAD.localScale, 0.3, 0.3, 0.3);
 
     // set hierarchy
     HEAD.setParent(BODY); // parent of head is body
@@ -264,6 +250,34 @@ export default class Assignment2 extends cs380.BaseApp {
     LF.setParent(LLL); // parent of left foot is left lower leg
 
     // set the remaining position, scale, rotation
+    vec3.set(BODY.localPosition, 0, -0.5, 0);
+
+    vec3.set(HEAD.localPosition, 0, 1, 0);
+    vec3.set(HEAD.localScale, 0.3, 0.3, 0.3);
+
+    vec3.set(RS.localScale, 0.1, 0.1, 0.1);
+    vec3.set(LS.localScale, 0.1, 0.1, 0.1);
+    vec3.set(RS.localPosition, 0.25, 0.5, 0);
+    vec3.set(LS.localPosition, -0.25, 0.5, 0);
+
+    quat.rotateZ(LS.localRotation, LS.localRotation, -Math.PI / 4);
+
+    vec3.set(RUA.localPosition, 30, 0, 0);
+    vec3.set(RUA.localScale, 20, 40, 20);
+    quat.rotateZ(RUA.localRotation, RUA.localRotation, Math.PI / 2);
+    vec3.set(LUA.localPosition, -30, 0, 0);
+    vec3.set(LUA.localScale, 20, 40, 20);
+    quat.rotateZ(LUA.localRotation, LUA.localRotation, -Math.PI / 2);
+
+    vec3.set(RAJ.localScale, 1 / 70, 1 / 250, 1 / 70);
+    vec3.set(LAJ.localScale, 1 / 70, 1 / 250, 1 / 70);
+
+    vec3.set(RLA.localScale, 200, 1400, 200);
+    vec3.set(RLA.localPosition, 0, -1000, 0);
+    vec3.set(LLA.localScale, 200, 1400, 200);
+    vec3.set(LLA.localPosition, 0, -1000, 0);
+
+    vec3.set(this.cylinder.transform.localPosition, 1, 0, 0);
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -334,6 +348,15 @@ export default class Assignment2 extends cs380.BaseApp {
     // renderPicking() here
     this.body.renderPicking(this.camera);
     this.head.renderPicking(this.camera);
+    this.rightShoulder.renderPicking(this.camera);
+    this.leftShoulder.renderPicking(this.camera);
+    this.rightUpperArm.renderPicking(this.camera);
+    this.leftUpperArm.renderPicking(this.camera);
+    this.rightArmJoint.renderPicking(this.camera);
+    this.leftArmJoint.renderPicking(this.camera);
+    this.rightLowerArm.renderPicking(this.camera);
+    this.leftLowerArm.renderPicking(this.camera);
+    this.cylinder.renderPicking(this.camera);
 
     // Render real scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -346,5 +369,14 @@ export default class Assignment2 extends cs380.BaseApp {
     // render() here
     this.body.render(this.camera);
     this.head.render(this.camera);
+    this.rightShoulder.render(this.camera);
+    this.leftShoulder.render(this.camera);
+    this.rightUpperArm.render(this.camera);
+    this.leftUpperArm.render(this.camera);
+    this.rightArmJoint.render(this.camera);
+    this.leftArmJoint.render(this.camera);
+    this.rightLowerArm.render(this.camera);
+    this.leftLowerArm.render(this.camera);
+    this.cylinder.render(this.camera);
   }
 }
