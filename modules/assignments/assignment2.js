@@ -382,6 +382,7 @@ export default class Assignment2 extends cs380.BaseApp {
     this.cameraAngle = 0;
 
     this.bodyAngle = 0;
+    this.headAngle = 0;
 
     this.rightShoulderAngle = 0;
     this.leftShoulderAngle = 0;
@@ -469,8 +470,6 @@ export default class Assignment2 extends cs380.BaseApp {
       this.state = 2;
     } else if (key == "f") {
       this.cameraState = 3;
-    } else if (key == "z") {
-      this.camera.transform.setParent(this.eye1.transform);
     }
   }
 
@@ -483,6 +482,12 @@ export default class Assignment2 extends cs380.BaseApp {
     const index = this.pickingBuffer.pick(x, y);
 
     console.log(`onMouseDown() got index ${index}`);
+    if (index == 2) {
+      // if head is clicked
+      // do 360
+      this.reset();
+      this.state = 3;
+    }
   }
 
   finalize() {
@@ -602,9 +607,33 @@ export default class Assignment2 extends cs380.BaseApp {
       );
       this.rightLegJointAngle += (Math.PI * dt) / 8;
     }
+
+    if (this.headAngle < Math.PI / 5) {
+      quat.rotateY(
+        this.head.transform.localRotation,
+        this.head.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      quat.rotateZ(
+        this.head.transform.localRotation,
+        this.head.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.headAngle += (Math.PI * dt) / 8;
+    }
+  }
+
+  roll(dt) {
+    this.pose1(dt);
+    quat.rotateZ(
+      this.body.transform.localRotation,
+      this.body.transform.localRotation,
+      (Math.PI * dt) / 2
+    );
   }
 
   reset() {
+    quat.set(this.head.transform.localRotation, 0, 0, 0, 1);
     quat.set(this.rightShoulder.transform.localRotation, 0, 0, 0, 1);
     quat.set(this.rightArmJoint.transform.localRotation, 0, 0, 0, 1);
     quat.set(this.leftShoulder.transform.localRotation, 0, 0, 0, 1);
@@ -616,6 +645,7 @@ export default class Assignment2 extends cs380.BaseApp {
     quat.set(this.body.transform.localRotation, 0, 0, 0, 1);
 
     this.bodyAngle = 0;
+    this.headAngle = 0;
 
     this.rightShoulderAngle = 0;
     this.leftShoulderAngle = 0;
@@ -638,6 +668,10 @@ export default class Assignment2 extends cs380.BaseApp {
 
     if (this.state == 2) {
       this.pose2(dt);
+    }
+
+    if (this.state == 3) {
+      this.roll(dt);
     }
 
     if (this.cameraState == 1) {
