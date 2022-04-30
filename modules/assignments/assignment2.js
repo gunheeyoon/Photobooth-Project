@@ -40,9 +40,27 @@ export default class Assignment2 extends cs380.BaseApp {
     this.thingsToClear.push(coneMesh);
 
     // body mesh
-    const bodyMeshData = cs380.primitives.generateCone(32, 0.5, 1);
+    const bodyMeshData = cs380.primitives.generateCone(32, 0.35, 1);
     const bodyMesh = cs380.Mesh.fromData(bodyMeshData);
     this.thingsToClear.push(bodyMesh);
+
+    // arm mesh
+    const upperArmMeshData = cs380.primitives.generateCylinder(16, 5, 30);
+    const upperArmMesh = cs380.Mesh.fromData(upperArmMeshData);
+    this.thingsToClear.push(upperArmMesh);
+
+    const lowerArmMeshData = cs380.primitives.generateCylinder(16, 0.08, 0.5);
+    const lowerArmMesh = cs380.Mesh.fromData(lowerArmMeshData);
+    this.thingsToClear.push(lowerArmMesh);
+
+    // leg mesh
+    const upperLegMeshData = cs380.primitives.generateCylinder(16, 5, 30);
+    const upperLegMesh = cs380.Mesh.fromData(upperLegMeshData);
+    this.thingsToClear.push(upperLegMesh);
+
+    const lowerLegMeshData = cs380.primitives.generateCylinder(16, 0.08, 0.5);
+    const lowerLegMesh = cs380.Mesh.fromData(lowerLegMeshData);
+    this.thingsToClear.push(lowerLegMesh);
 
     // sphere mesh
     const sphereMeshdata = cs380.primitives.generateSphere();
@@ -53,6 +71,16 @@ export default class Assignment2 extends cs380.BaseApp {
     const cylinderMeshData = cs380.primitives.generateCylinder(32, 0.2, 0.7);
     const cylinderMesh = cs380.Mesh.fromData(cylinderMeshData);
     this.thingsToClear.push(cylinderMesh);
+
+    // eye and mouth mesh
+    const eyeMeshData = cs380.primitives.generateCylinder(16, 0.5, 0.1);
+    const eyeMesh = cs380.Mesh.fromData(eyeMeshData);
+    this.thingsToClear.push(eyeMesh);
+
+    // background mesh
+    const backgroundMeshData = cs380.primitives.generateCube(20, 20, 0.5);
+    const backgroundMesh = cs380.Mesh.fromData(backgroundMeshData);
+    this.thingsToClear.push(backgroundMesh);
 
     // initialize picking shader & buffer
     const pickingShader = await cs380.buildShader(cs380.PickingShader);
@@ -86,13 +114,13 @@ export default class Assignment2 extends cs380.BaseApp {
       4
     );
     this.rightUpperArm = new cs380.PickableObject(
-      cylinderMesh,
+      upperArmMesh,
       simpleShader,
       pickingShader,
       5
     );
     this.leftUpperArm = new cs380.PickableObject(
-      cylinderMesh,
+      upperArmMesh,
       simpleShader,
       pickingShader,
       6
@@ -110,13 +138,13 @@ export default class Assignment2 extends cs380.BaseApp {
       8
     );
     this.rightLowerArm = new cs380.PickableObject(
-      cylinderMesh,
+      lowerArmMesh,
       simpleShader,
       pickingShader,
       9
     );
     this.leftLowerArm = new cs380.PickableObject(
-      cylinderMesh,
+      lowerArmMesh,
       simpleShader,
       pickingShader,
       10
@@ -146,13 +174,13 @@ export default class Assignment2 extends cs380.BaseApp {
       14
     );
     this.rightUpperLeg = new cs380.PickableObject(
-      cylinderMesh,
+      upperLegMesh,
       simpleShader,
       pickingShader,
       15
     );
     this.leftUpperLeg = new cs380.PickableObject(
-      cylinderMesh,
+      upperLegMesh,
       simpleShader,
       pickingShader,
       16
@@ -170,13 +198,13 @@ export default class Assignment2 extends cs380.BaseApp {
       18
     );
     this.rightLowerLeg = new cs380.PickableObject(
-      cylinderMesh,
+      lowerLegMesh,
       simpleShader,
       pickingShader,
       19
     );
     this.leftLowerLeg = new cs380.PickableObject(
-      cylinderMesh,
+      lowerLegMesh,
       simpleShader,
       pickingShader,
       20
@@ -193,11 +221,38 @@ export default class Assignment2 extends cs380.BaseApp {
       pickingShader,
       22
     );
-    this.cylinder = new cs380.PickableObject(
-      cylinderMesh,
+
+    this.cameraControl = new cs380.PickableObject(
+      sphereMesh,
       simpleShader,
       pickingShader,
       23
+    );
+
+    this.background = new cs380.PickableObject(
+      backgroundMesh,
+      simpleShader,
+      pickingShader,
+      24
+    );
+
+    this.eye1 = new cs380.PickableObject(
+      eyeMesh,
+      simpleShader,
+      pickingShader,
+      25
+    );
+    this.eye2 = new cs380.PickableObject(
+      eyeMesh,
+      simpleShader,
+      pickingShader,
+      26
+    );
+    this.mouth = new cs380.PickableObject(
+      eyeMesh,
+      simpleShader,
+      pickingShader,
+      27
     );
 
     // move around the objects
@@ -249,6 +304,14 @@ export default class Assignment2 extends cs380.BaseApp {
     RF.setParent(RLL); // parent of right foot is right lower leg
     LF.setParent(LLL); // parent of left foot is left lower leg
 
+    // invisible sphere object for controlling camera
+    this.camera.transform.setParent(this.cameraControl.transform);
+
+    // eyes and mouth hierarchy
+    this.eye1.transform.setParent(HEAD);
+    this.eye2.transform.setParent(HEAD);
+    this.mouth.transform.setParent(HEAD);
+
     // set the remaining position, scale, rotation
     vec3.set(BODY.localPosition, 0, -0.5, 0);
 
@@ -257,52 +320,108 @@ export default class Assignment2 extends cs380.BaseApp {
 
     vec3.set(RS.localScale, 0.1, 0.1, 0.1);
     vec3.set(LS.localScale, 0.1, 0.1, 0.1);
-    vec3.set(RS.localPosition, 0.25, 0.5, 0);
-    vec3.set(LS.localPosition, -0.25, 0.5, 0);
-
-    quat.rotateZ(LS.localRotation, LS.localRotation, -Math.PI / 4);
+    vec3.set(RS.localPosition, 0.2, 0.5, 0);
+    vec3.set(LS.localPosition, -0.2, 0.5, 0);
 
     vec3.set(RUA.localPosition, 30, 0, 0);
-    vec3.set(RUA.localScale, 20, 40, 20);
     quat.rotateZ(RUA.localRotation, RUA.localRotation, Math.PI / 2);
     vec3.set(LUA.localPosition, -30, 0, 0);
-    vec3.set(LUA.localScale, 20, 40, 20);
     quat.rotateZ(LUA.localRotation, LUA.localRotation, -Math.PI / 2);
 
-    vec3.set(RAJ.localScale, 1 / 70, 1 / 250, 1 / 70);
-    vec3.set(LAJ.localScale, 1 / 70, 1 / 250, 1 / 70);
+    vec3.set(RAJ.localScale, 7, 7, 7);
+    vec3.set(LAJ.localScale, 7, 7, 7);
 
-    vec3.set(RLA.localScale, 200, 1400, 200);
-    vec3.set(RLA.localPosition, 0, -1000, 0);
-    vec3.set(LLA.localScale, 200, 1400, 200);
-    vec3.set(LLA.localPosition, 0, -1000, 0);
+    vec3.set(RLA.localPosition, 0, -0.5, 0);
+    vec3.set(LLA.localPosition, 0, -0.5, 0);
 
-    vec3.set(RHAND.localScale, 1 / 800, 1 / 9000, 1 / 800);
-    vec3.set(LHAND.localScale, 1 / 800, 1 / 9000, 1 / 800);
+    vec3.set(RHAND.localScale, 0.1, 0.1, 0.1);
+    vec3.set(LHAND.localScale, 0.1, 0.1, 0.1);
 
     vec3.set(RHIP.localPosition, 0.2, -0.05, 0);
     vec3.set(LHIP.localPosition, -0.2, -0.05, 0);
-
     vec3.set(RHIP.localScale, 0.1, 0.1, 0.1);
     vec3.set(LHIP.localScale, 0.1, 0.1, 0.1);
 
     vec3.set(RUL.localPosition, 0, -30, 0);
     vec3.set(LUL.localPosition, 0, -30, 0);
-    vec3.set(RUL.localScale, 25, 50, 25);
-    vec3.set(LUL.localScale, 25, 50, 25);
 
-    vec3.set(RLJ.localScale, 1 / 100, 1 / 400, 1 / 100);
-    vec3.set(LLJ.localScale, 1 / 100, 1 / 400, 1 / 100);
+    vec3.set(RLJ.localScale, 7, 7, 7);
+    vec3.set(LLJ.localScale, 7, 7, 7);
 
-    vec3.set(RLL.localPosition, 0, -1500, 0);
-    vec3.set(RLL.localScale, 350, 2000, 350);
-    vec3.set(LLL.localPosition, 0, -1500, 0);
-    vec3.set(LLL.localScale, 350, 2000, 350);
+    vec3.set(RLL.localPosition, 0, -0.6, 0);
+    vec3.set(LLL.localPosition, 0, -0.6, 0);
 
-    vec3.set(RF.localScale, 1 / 1500, 1 / 8000, 1 / 1500);
-    vec3.set(LF.localScale, 1 / 1500, 1 / 8000, 1 / 1500);
+    vec3.set(RF.localScale, 0.1, 0.1, 0.1);
+    vec3.set(LF.localScale, 0.1, 0.1, 0.1);
 
-    vec3.set(this.cylinder.transform.localPosition, 1, 0, 0);
+    quat.rotateX(
+      this.eye1.transform.localRotation,
+      this.eye1.transform.localRotation,
+      Math.PI / 2
+    );
+    quat.rotateX(
+      this.eye2.transform.localRotation,
+      this.eye2.transform.localRotation,
+      Math.PI / 2
+    );
+    quat.rotateX(
+      this.mouth.transform.localRotation,
+      this.mouth.transform.localRotation,
+      Math.PI / 2
+    );
+    vec3.set(this.eye1.transform.localPosition, 1, 1, 3);
+    vec3.set(this.eye2.transform.localPosition, -1, 1, 3);
+    vec3.set(this.mouth.transform.localPosition, 0, -0.7, 3.2);
+
+    vec3.set(this.background.transform.localPosition, 0, 0, -10);
+
+    this.state = 0;
+    this.cameraState = 0;
+    this.transition = 0;
+
+    this.cameraAngle = 0;
+
+    this.bodyAngle = 0;
+
+    this.rightShoulderAngle = 0;
+    this.leftShoulderAngle = 0;
+    this.rightArmJointAngle = 0;
+    this.leftArmJointAngle = 0;
+
+    this.rightHipAngle = 0;
+    this.leftHipAngle = 0;
+    this.rightLegJointAngle = 0;
+    this.leftLegJointAngle = 0;
+
+    // colors
+    this.background.uniforms.mainColor = [49 / 255, 50 / 255, 51 / 255];
+    this.eye1.uniforms.mainColor = [0, 0, 0];
+    this.eye2.uniforms.mainColor = [0, 0, 0];
+    this.mouth.uniforms.mainColor = [0, 0, 0];
+    // colors - joints
+    this.rightShoulder.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.leftShoulder.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.rightArmJoint.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.leftArmJoint.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.rightHip.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.leftHip.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.rightLegJoint.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+    this.leftLegJoint.uniforms.mainColor = [50 / 255, 168 / 255, 82 / 255];
+
+    // colors - arms
+    this.rightUpperArm.uniforms.mainColor = [119 / 255, 50 / 255, 168 / 255];
+    this.rightLowerArm.uniforms.mainColor = [119 / 255, 50 / 255, 168 / 255];
+    this.leftUpperArm.uniforms.mainColor = [119 / 255, 50 / 255, 168 / 255];
+    this.leftLowerArm.uniforms.mainColor = [119 / 255, 50 / 255, 168 / 255];
+
+    // colors - legs
+    this.rightUpperLeg.uniforms.mainColor = [181 / 255, 41 / 255, 20 / 255];
+    this.rightLowerLeg.uniforms.mainColor = [181 / 255, 41 / 255, 20 / 255];
+    this.leftUpperLeg.uniforms.mainColor = [181 / 255, 41 / 255, 20 / 255];
+    this.leftLowerLeg.uniforms.mainColor = [181 / 255, 41 / 255, 20 / 255];
+
+    // colors - body
+    this.body.uniforms.mainColor = [20 / 255, 41 / 255, 181 / 255];
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -338,12 +457,20 @@ export default class Assignment2 extends cs380.BaseApp {
 
   onKeyDown(key) {
     console.log(`key down: ${key}`);
-    if (key == "e") {
-      this.camera.transform.setParent(this.rightFoot.transform);
-      vec3.set(this.camera.transform.localPosition, 0, 0, 8);
-    } else {
-      this.camera.transform.setParent(null);
-      vec3.set(this.camera.transform.localPosition, 0, 0, 8);
+    if (key == "w") {
+      this.reset();
+      this.state = 1;
+    } else if (key == "a") {
+      this.cameraState = 1;
+    } else if (key == "d") {
+      this.cameraState = 2;
+    } else if (key == "s") {
+      this.reset();
+      this.state = 2;
+    } else if (key == "f") {
+      this.cameraState = 3;
+    } else if (key == "z") {
+      this.camera.transform.setParent(this.eye1.transform);
     }
   }
 
@@ -365,9 +492,168 @@ export default class Assignment2 extends cs380.BaseApp {
     this.thingsToClear.forEach((it) => it.finalize());
   }
 
+  pose1(dt) {
+    if (this.leftArmJointAngle < Math.PI / 2) {
+      quat.rotateZ(
+        this.leftArmJoint.transform.localRotation,
+        this.leftArmJoint.transform.localRotation,
+        (-Math.PI * dt) / 8
+      );
+      this.leftArmJointAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.rightArmJointAngle > -Math.PI / 2) {
+      quat.rotateZ(
+        this.rightArmJoint.transform.localRotation,
+        this.rightArmJoint.transform.localRotation,
+        (-Math.PI * dt) / 8
+      );
+      this.rightArmJointAngle -= (Math.PI * dt) / 8;
+    }
+
+    if (this.leftHipAngle < Math.PI / 2) {
+      quat.rotateZ(
+        this.leftHip.transform.localRotation,
+        this.leftHip.transform.localRotation,
+        (-Math.PI * dt) / 8
+      );
+      this.leftHipAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.leftLegJointAngle < Math.PI / 2) {
+      quat.rotateZ(
+        this.leftLegJoint.transform.localRotation,
+        this.leftLegJoint.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.leftLegJointAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.rightLegJointAngle < Math.PI / 2) {
+      quat.rotateZ(
+        this.rightLegJoint.transform.localRotation,
+        this.rightLegJoint.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.rightLegJointAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.bodyAngle < Math.PI / 4) {
+      quat.rotateZ(
+        this.body.transform.localRotation,
+        this.body.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.bodyAngle += (Math.PI * dt) / 8;
+    }
+  }
+
+  pose2(dt) {
+    if (this.rightShoulderAngle < Math.PI / 4) {
+      quat.rotateZ(
+        this.rightShoulder.transform.localRotation,
+        this.rightShoulder.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.rightShoulderAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.leftShoulderAngle < Math.PI / 2) {
+      quat.rotateY(
+        this.leftShoulder.transform.localRotation,
+        this.leftShoulder.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.leftShoulderAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.leftArmJointAngle < Math.PI / 2) {
+      quat.rotateY(
+        this.leftArmJoint.transform.localRotation,
+        this.leftArmJoint.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.leftArmJointAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.leftArmJointAngle < (Math.PI * 3) / 4) {
+      quat.rotateZ(
+        this.leftArmJoint.transform.localRotation,
+        this.leftArmJoint.transform.localRotation,
+        (-Math.PI * dt) / 8
+      );
+      this.leftArmJointAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.rightHipAngle < Math.PI / 2) {
+      quat.rotateX(
+        this.rightHip.transform.localRotation,
+        this.rightHip.transform.localRotation,
+        (-Math.PI * dt) / 8
+      );
+      this.rightHipAngle += (Math.PI * dt) / 8;
+    }
+
+    if (this.rightLegJointAngle < Math.PI / 2) {
+      quat.rotateX(
+        this.rightLegJoint.transform.localRotation,
+        this.rightLegJoint.transform.localRotation,
+        (Math.PI * dt) / 8
+      );
+      this.rightLegJointAngle += (Math.PI * dt) / 8;
+    }
+  }
+
+  reset() {
+    quat.set(this.rightShoulder.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.rightArmJoint.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.leftShoulder.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.leftArmJoint.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.rightHip.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.rightLegJoint.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.leftHip.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.leftLegJoint.transform.localRotation, 0, 0, 0, 1);
+    quat.set(this.body.transform.localRotation, 0, 0, 0, 1);
+
+    this.bodyAngle = 0;
+
+    this.rightShoulderAngle = 0;
+    this.leftShoulderAngle = 0;
+    this.rightArmJointAngle = 0;
+    this.leftArmJointAngle = 0;
+
+    this.rightHipAngle = 0;
+    this.leftHipAngle = 0;
+    this.rightLegJointAngle = 0;
+    this.leftLegJointAngle = 0;
+  }
+
   update(elapsed, dt) {
     // Updates before rendering here
     this.simpleOrbitControl.update(dt);
+
+    if (this.state == 1) {
+      this.pose1(dt);
+    }
+
+    if (this.state == 2) {
+      this.pose2(dt);
+    }
+
+    if (this.cameraState == 1) {
+      quat.rotateY(
+        this.cameraControl.transform.localRotation,
+        this.cameraControl.transform.localRotation,
+        (Math.PI * dt) / 3
+      );
+    }
+    if (this.cameraState == 2) {
+      quat.rotateY(
+        this.cameraControl.transform.localRotation,
+        this.cameraControl.transform.localRotation,
+        (-Math.PI * dt) / 3
+      );
+    }
 
     // Render picking information first
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingBuffer.fbo);
@@ -380,21 +666,14 @@ export default class Assignment2 extends cs380.BaseApp {
     // renderPicking() here
     this.body.renderPicking(this.camera);
     this.head.renderPicking(this.camera);
-    this.rightShoulder.renderPicking(this.camera);
-    this.leftShoulder.renderPicking(this.camera);
     this.rightUpperArm.renderPicking(this.camera);
     this.leftUpperArm.renderPicking(this.camera);
-    this.rightArmJoint.renderPicking(this.camera);
-    this.leftArmJoint.renderPicking(this.camera);
     this.rightLowerArm.renderPicking(this.camera);
     this.leftLowerArm.renderPicking(this.camera);
-    //this.rightHand.renderPicking(this.camera);
-    //this.leftHand.renderPicking(this.camera);
-    this.rightHip.renderPicking(this.camera);
-    this.leftHip.renderPicking(this.camera);
     this.rightUpperLeg.renderPicking(this.camera);
     this.leftUpperLeg.renderPicking(this.camera);
-    //this.cylinder.renderPicking(this.camera);
+    this.rightLowerLeg.renderPicking(this.camera);
+    this.leftLowerLeg.renderPicking(this.camera);
 
     // Render real scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -427,6 +706,11 @@ export default class Assignment2 extends cs380.BaseApp {
     this.leftLowerLeg.render(this.camera);
     this.leftFoot.render(this.camera);
     this.rightFoot.render(this.camera);
-    //this.cylinder.render(this.camera);
+
+    this.eye1.render(this.camera);
+    this.eye2.render(this.camera);
+    this.mouth.render(this.camera);
+
+    this.background.render(this.camera);
   }
 }
