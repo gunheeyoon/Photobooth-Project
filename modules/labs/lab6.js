@@ -76,7 +76,7 @@ export default class Lab6App extends cs380.BaseApp {
     // initialize a sphere Object
     this.sphere = new cs380.PickableObject(
       sphereMesh,
-      simpleShader,
+      blinnPhongShader,
       pickingShader,
       1
     );

@@ -44,6 +44,17 @@ void main() {
         
         if (lights[i].type == DIRECTIONAL) {
             // TODO: implement diffuse and specular reflections for directional light
+            vec4 lit = vec4(-lights[i].dir, 0);
+            vec3 L = normalize((W2C * lit).xyz);
+            float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
+            intensity += mainColor * i1;
+
+            vec3 V = normalize((W2C * frag_pos).xyz);
+            vec3 H = normalize(L - V);
+            float i2 = max(dot(N, H), 0.0f);
+            float i3 = pow(i2, 20.0f) * lights[i].illuminance;
+            intensity += mainColor * i3;
+
         }
         else if (lights[i].type == POINT) {
             continue;
