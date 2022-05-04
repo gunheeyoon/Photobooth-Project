@@ -53,6 +53,7 @@ void main() {
         }
         else if (lights[i].type == AMBIENT) {
             // TODO: implement ambient reflection
+            intensity = intensity + mainColor * lights[i].illuminance;
         }
     }
     
