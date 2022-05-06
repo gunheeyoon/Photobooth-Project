@@ -40,7 +40,7 @@ void main() {
     vec3 N = normalize(frag_normal.xyz);
     
     for (int i=0; i<numLights; i++){
-        if (!lights[i].enabled) continue;
+        if (lights[i].enabled == false) continue;
         
         if (lights[i].type == DIRECTIONAL) {
             // TODO: implement diffuse and specular reflections for directional light
