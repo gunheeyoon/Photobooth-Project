@@ -69,6 +69,7 @@ export default class Lab6App extends cs380.BaseApp {
     const light1 = new Light();
     vec3.set(lightDir, -1, -1, -1);
     light1.illuminance = 0.9;
+    light1.color = [1, 1, 1];
     light1.transform.lookAt(lightDir);
     light1.type = LightType.DIRECTIONAL;
     this.lights.push(light1);
