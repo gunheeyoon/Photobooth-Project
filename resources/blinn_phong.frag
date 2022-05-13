@@ -55,34 +55,72 @@ void main() {
     
     for (int i=0; i<numLights; i++){
         if (lights[i].enabled == false) continue;
+
+        vec3 lightPos = (W2C * vec4(lights[i].pos, 1)).xyz;
+        vec3 L = vec3(0);
         
         if (lights[i].type == DIRECTIONAL) {
             // TODO: implement diffuse and specular reflections for directional light
             //diffuse
             vec4 lit = vec4(-lights[i].dir, 0);
-            vec3 L = normalize((W2C * lit).xyz);
+            L = normalize((W2C * lit).xyz);
             float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
             intensity += mainColor * i1;
             //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i1;
 
             //specular
-            vec3 V = normalize((W2C * frag_pos).xyz);
-            vec3 H = normalize(L - V);
+            vec3 V = normalize((-frag_pos).xyz);
+            vec3 H = normalize(L + V);
             float i2 = max(dot(N, H), 0.0f);
             float i3 = pow(i2, 20.0f) * lights[i].illuminance;
             intensity += mainColor * i3;
             //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i3;
         }
         else if (lights[i].type == POINT) {
-            continue;
+            vec4 lit = -frag_pos + vec4(lights[i].pos, 1);
+            L = normalize((W2C * lit).xyz);
+            float point = 0.0;
+            vec3 distanceVec = (W2C * lit).xyz;
+            float d = dot(distanceVec, distanceVec);
+            point = 1.0 / d;
+
+            float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i1 * point;
+
+            //specular
+            vec3 V = normalize((-frag_pos).xyz);
+            vec3 H = normalize(L + V);
+            float i2 = max(dot(N, H), 0.0f);
+            float i3 = pow(i2, 20.0f) * lights[i].illuminance;
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i3 * point;
         }
         else if (lights[i].type == SPOTLIGHT) {
-            continue;
+            float angle = cos(radians(lights[i].angle));
+            vec4 lightDir = vec4(-lights[i].dir, 0);
+            vec4 lit = -frag_pos + vec4(lights[i].pos, 1);
+            L = normalize((W2C * lit).xyz);
+            vec3 D = normalize((W2C * lightDir).xyz);
+            float angle_diff = abs(dot(L, D)); //cos
+            float spot = 0.0;
+
+            if(angle_diff >= angle) {
+                spot = 1.0;
+            }
+
+            float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i1 * spot;
+
+            //specular
+            vec3 V = normalize((-frag_pos).xyz);
+            vec3 H = normalize(L + V);
+            float i2 = max(dot(N, H), 0.0f);
+            float i3 = pow(i2, 20.0f) * lights[i].illuminance;
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i3 * spot;
         }
         else if (lights[i].type == AMBIENT) {
             // TODO: implement ambient reflection
-            //intensity += mainColor * lights[i].illuminance;
-            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * lights[i].illuminance;
+            intensity += mainColor * lights[i].illuminance;
+            //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * lights[i].illuminance;
         }
     }
     

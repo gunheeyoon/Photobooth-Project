@@ -458,7 +458,7 @@ export default class Assignment3 extends cs380.BaseApp {
 
     const light1 = new Light();
     vec3.set(lightDir, -1, -1, -1);
-    light1.illuminance = 0.9;
+    light1.illuminance = 0.0;
     light1.color = [255, 0, 0];
     light1.r = 255;
     light1.g = 0;
@@ -466,6 +466,26 @@ export default class Assignment3 extends cs380.BaseApp {
     light1.transform.lookAt(lightDir);
     light1.type = LightType.DIRECTIONAL;
     this.lights.push(light1);
+
+    const light2 = new Light();
+    light2.illuminance = 2;
+    light2.r = 255;
+    light2.g = 0;
+    light2.b = 0;
+    light2.transform.localPosition = [1, 0, 0];
+    light2.type = LightType.POINT;
+    this.lights.push(light2);
+
+    const light3 = new Light();
+    light3.illuminance = 0.9;
+    light3.r = 0;
+    light3.g = 0;
+    light3.b = 255;
+    light3.transform.localPosition = [-2, 0, 0];
+    light3.transform.lookAt([-1, 0, 0]);
+    light3.angle = 20; // in degrees
+    light3.type = LightType.SPOTLIGHT;
+    this.lights.push(light3);
 
     this.body.uniforms.lights = this.lights;
     this.head.uniforms.lights = this.lights;
@@ -730,6 +750,27 @@ export default class Assignment3 extends cs380.BaseApp {
   update(elapsed, dt) {
     // Updates before rendering here
     this.simpleOrbitControl.update(dt);
+
+    quat.rotateY(
+      this.lights[3].transform.localRotation,
+      this.lights[3].transform.localRotation,
+      (Math.PI * dt) / 3
+    );
+
+    var i = 1;
+
+    if (this.lights[2].transform.localPosition[1] > 2) {
+      i = -1;
+    } else if (this.lights[2].transform.localPosition[1] < -2) {
+      i = 1;
+    }
+
+    vec3.set(
+      this.lights[2].transform.localPosition,
+      1,
+      this.lights[2].transform.localPosition[1] + i * dt,
+      0
+    );
 
     if (this.state == 1) {
       this.pose1(dt);
