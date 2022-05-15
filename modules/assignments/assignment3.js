@@ -12,7 +12,7 @@ export default class Assignment3 extends cs380.BaseApp {
     const { width, height } = gl.canvas.getBoundingClientRect();
     const aspectRatio = width / height;
     this.camera = new cs380.Camera();
-    vec3.set(this.camera.transform.localPosition, 0, 0, 8);
+    vec3.set(this.camera.transform.localPosition, 0, 0, 4);
     mat4.perspective(
       this.camera.projectionMatrix,
       glMatrix.toRadian(45),
@@ -468,24 +468,40 @@ export default class Assignment3 extends cs380.BaseApp {
     this.lights.push(light1);
 
     const light2 = new Light();
-    light2.illuminance = 2;
+    light2.illuminance = 1;
     light2.r = 255;
     light2.g = 0;
     light2.b = 0;
-    light2.transform.localPosition = [1, 0, 0];
+    light2.transform.localPosition = [2, 0, 0];
     light2.type = LightType.POINT;
     this.lights.push(light2);
 
     const light3 = new Light();
-    light3.illuminance = 0.9;
-    light3.r = 0;
-    light3.g = 0;
-    light3.b = 255;
-    light3.transform.localPosition = [-2, 0, 0];
-    light3.transform.lookAt([-1, 0, 0]);
+    light3.illuminance = 0.2;
+    light3.r = 255;
+    light3.g = 255;
+    light3.b = 0;
+    light3.transform.localPosition = [-2, 0, -3];
+    light3.transform.lookAt([0, 0, -1]);
     light3.angle = 20; // in degrees
+    light3.angleSmoothness = 5;
     light3.type = LightType.SPOTLIGHT;
     this.lights.push(light3);
+
+    const light4 = new Light();
+    light4.illuminance = 0.5;
+    light4.r = 0;
+    light4.g = 255;
+    light4.b = 0;
+    light4.transform.localPosition = [0, 5, -4];
+    quat.rotateX(
+      light4.transform.localRotation,
+      light4.transform.localRotation,
+      -Math.PI / 2
+    );
+    light4.angle = 10;
+    light4.type = LightType.SPOTLIGHT;
+    this.lights.push(light4);
 
     this.body.uniforms.lights = this.lights;
     this.head.uniforms.lights = this.lights;
@@ -749,7 +765,7 @@ export default class Assignment3 extends cs380.BaseApp {
 
   update(elapsed, dt) {
     // Updates before rendering here
-    this.simpleOrbitControl.update(dt);
+    //this.simpleOrbitControl.update(dt);
 
     quat.rotateY(
       this.lights[3].transform.localRotation,
@@ -757,19 +773,18 @@ export default class Assignment3 extends cs380.BaseApp {
       (Math.PI * dt) / 3
     );
 
-    var i = 1;
-
-    if (this.lights[2].transform.localPosition[1] > 2) {
-      i = -1;
-    } else if (this.lights[2].transform.localPosition[1] < -2) {
-      i = 1;
-    }
-
+    var angle = Math.PI * elapsed;
     vec3.set(
       this.lights[2].transform.localPosition,
-      1,
-      this.lights[2].transform.localPosition[1] + i * dt,
-      0
+      Math.cos(angle),
+      0,
+      -4 + Math.sin(-angle)
+    );
+    vec3.set(
+      this.lights[4].transform.localPosition,
+      3 * Math.cos(angle),
+      5,
+      -4 + Math.sin(angle)
     );
 
     if (this.state == 1) {

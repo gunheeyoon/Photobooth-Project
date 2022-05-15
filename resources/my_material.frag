@@ -15,6 +15,19 @@ uniform mat4 cameraTransform;
 
 uniform vec3 mainColor;
 
+uniform float ambientR;
+uniform float diffuseR;
+uniform float specularR;
+uniform float shininessR;
+uniform float ambientG;
+uniform float diffuseG;
+uniform float specularG;
+uniform float shininessG;
+uniform float ambientB;
+uniform float diffuseB;
+uniform float specularB;
+uniform float shininessB;
+
 struct Light {
     int type;
     bool enabled;
@@ -136,4 +149,3 @@ void main() {
     
     output_color.rgb = pow(output_color.rgb, vec3(1.0 / 2.2));  // Gamma correction
 }
-

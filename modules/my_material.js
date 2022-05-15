@@ -4,50 +4,43 @@ import { vec3, vec4 } from "./cs380/gl-matrix.js";
 
 import * as cs380 from "./cs380/cs380.js";
 
-export const LightType = {
-  DIRECTIONAL: 0,
-  POINT: 1,
-  SPOTLIGHT: 2,
-  AMBIENT: 3,
-};
+import { LightType, Light } from "./blinn_phong.js";
 
-export class Light {
-  constructor() {
-    this.transform = new cs380.Transform();
-    this.type = LightType.DIRECTIONAL;
-    this.enabled = true;
-    this.illuminance = 1;
-    this.angle = 0;
-    this.angleSmoothness = 0.1;
-    this.color = vec3.create();
-    this.r = 1;
-    this.g = 1;
-    this.b = 1;
-    this._v3 = vec3.create();
-    this._v4 = vec4.create();
-  }
-
-  get pos() {
-    vec3.set(this._v3, 0, 0, 0);
-    vec3.transformMat4(this._v3, this._v3, this.transform.worldMatrix);
-    return this._v3;
-  }
-
-  get dir() {
-    vec4.set(this._v4, 0, 0, -1, 0);
-    vec4.transformMat4(this._v4, this._v4, this.transform.worldMatrix);
-    vec3.set(this._v3, ...this._v4);
-    return this._v3;
-  }
-}
-
-export class BlinnPhongShader extends cs380.BaseShader {
+export class MyMaterialShader extends cs380.BaseShader {
   static get source() {
     // Define shader codes here
     return [
-      [gl.VERTEX_SHADER, "resources/my_material.vert"],
-      [gl.FRAGMENT_SHADER, "resources/my_material.frag"],
+      [gl.VERTEX_SHADER, "resources/blinn_phong.vert"],
+      [gl.FRAGMENT_SHADER, "resources/blinn_phong.frag"],
     ];
+  }
+
+  constructor(
+    ambientR,
+    diffuseR,
+    specularR,
+    shininessR,
+    ambientG,
+    diffuseG,
+    specularG,
+    shininessG,
+    ambientB,
+    diffuseB,
+    specularB,
+    shininessB
+  ) {
+    this.ambientR = ambientR;
+    this.ambientG = ambientG;
+    this.ambientB = ambientB;
+    this.diffuseR = diffuseR;
+    this.diffuseG = diffuseG;
+    this.diffuseB = diffuseB;
+    this.specularR = specularR;
+    this.specularG = specularG;
+    this.specularB = specularB;
+    this.shininessR = shininessR;
+    this.shininessG = shininessG;
+    this.shininessB = shininessB;
   }
 
   generateUniformLocations() {
@@ -70,6 +63,18 @@ export class BlinnPhongShader extends cs380.BaseShader {
 
     // Set shader-specific uniforms here
     this.setUniformVec3(kv, "mainColor", 1, 1, 1);
+    this.setUniformFloat(kv, "ambientR", this.ambientR);
+    this.setUniformFloat(kv, "diffuseR", this.diffuseR);
+    this.setUniformFloat(kv, "specularR", this.specularR);
+    this.setUniformFloat(kv, "shininessR", this.shininessR);
+    this.setUniformFloat(kv, "ambientG", this.ambientG);
+    this.setUniformFloat(kv, "diffuseG", this.diffuseG);
+    this.setUniformFloat(kv, "specularG", this.specularG);
+    this.setUniformFloat(kv, "shininessG", this.shininessG);
+    this.setUniformFloat(kv, "ambientB", this.ambientB);
+    this.setUniformFloat(kv, "diffuseB", this.diffuseB);
+    this.setUniformFloat(kv, "specularB", this.specularB);
+    this.setUniformFloat(kv, "shininessB", this.shininessB);
 
     if ("lights" in kv) {
       const lights = kv["lights"];
