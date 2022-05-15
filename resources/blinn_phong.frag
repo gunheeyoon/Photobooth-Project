@@ -103,16 +103,16 @@ void main() {
         }
         else if (lights[i].type == SPOTLIGHT) {
             float angle = cos(radians(lights[i].angle));
-            vec4 lightDir = vec4(-lights[i].dir, 0);
+            vec4 lightDir = vec4(lights[i].dir, 0);
             vec4 lit = -frag_pos + vec4(lightPos, 1);
-            vec4 lit1 = -frag_pos + vec4(lights[i].pos, 1);
-            L = normalize((W2C * lit).xyz);
+            L = normalize((lit).xyz);
             vec3 D = normalize((W2C * lightDir).xyz);
             float angle_diff = abs(dot(L, D)); //cos
             float spot = 0.0;
 
             if(angle_diff >= angle) {
                 spot = pow(angle_diff, lights[i].angleSmoothness);
+                //spot = 1.0;
             }
 
             float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);

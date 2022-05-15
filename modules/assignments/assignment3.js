@@ -5,6 +5,7 @@ import * as cs380 from "../cs380/cs380.js";
 
 import { LightType, Light, BlinnPhongShader } from "../blinn_phong.js";
 import { SimpleShader } from "../simple_shader.js";
+import { MyMaterialShader } from "../my_material.js";
 
 export default class Assignment3 extends cs380.BaseApp {
   async initialize() {
@@ -44,6 +45,20 @@ export default class Assignment3 extends cs380.BaseApp {
     // blinn-phong shader
     const blinnPhongShader = await cs380.buildShader(BlinnPhongShader);
     this.thingsToClear.push(blinnPhongShader);
+
+    //my material shader
+    const materialAmbient = [1.0, 0.8, 1.0];
+    const materialDiffuse = [0.5, 0.5, 0.5];
+    const materialSpecular = [1.0, 0.8, 1.0];
+    const shine = 60.1;
+    const myMaterialShader = await cs380.buildShader(
+      MyMaterialShader,
+      ...materialAmbient,
+      ...materialDiffuse,
+      ...materialSpecular,
+      shine
+    );
+    this.thingsToClear.push(myMaterialShader);
 
     // cone mesh
     const coneMeshData = cs380.primitives.generateCone(64, 0.8, 1);
@@ -481,7 +496,7 @@ export default class Assignment3 extends cs380.BaseApp {
     light3.r = 255;
     light3.g = 255;
     light3.b = 0;
-    light3.transform.localPosition = [-2, 0, -3];
+    light3.transform.localPosition = [0, 0, 5];
     light3.transform.lookAt([0, 0, -1]);
     light3.angle = 20; // in degrees
     light3.angleSmoothness = 5;
@@ -765,7 +780,7 @@ export default class Assignment3 extends cs380.BaseApp {
 
   update(elapsed, dt) {
     // Updates before rendering here
-    //this.simpleOrbitControl.update(dt);
+    this.simpleOrbitControl.update(dt);
 
     quat.rotateY(
       this.lights[3].transform.localRotation,
@@ -778,13 +793,13 @@ export default class Assignment3 extends cs380.BaseApp {
       this.lights[2].transform.localPosition,
       Math.cos(angle),
       0,
-      -4 + Math.sin(-angle)
+      -0.5 + Math.sin(-angle)
     );
     vec3.set(
       this.lights[4].transform.localPosition,
       3 * Math.cos(angle),
       5,
-      -4 + Math.sin(angle)
+      -0.5 + 3 * Math.sin(angle)
     );
 
     if (this.state == 1) {

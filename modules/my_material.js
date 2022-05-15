@@ -10,25 +10,24 @@ export class MyMaterialShader extends cs380.BaseShader {
   static get source() {
     // Define shader codes here
     return [
-      [gl.VERTEX_SHADER, "resources/blinn_phong.vert"],
-      [gl.FRAGMENT_SHADER, "resources/blinn_phong.frag"],
+      [gl.VERTEX_SHADER, "resources/my_material.vert"],
+      [gl.FRAGMENT_SHADER, "resources/my_material.frag"],
     ];
   }
 
   constructor(
     ambientR,
-    diffuseR,
-    specularR,
-    shininessR,
     ambientG,
-    diffuseG,
-    specularG,
-    shininessG,
     ambientB,
+    diffuseR,
+    diffuseG,
     diffuseB,
+    specularR,
+    specularG,
     specularB,
-    shininessB
+    shininess
   ) {
+    super();
     this.ambientR = ambientR;
     this.ambientG = ambientG;
     this.ambientB = ambientB;
@@ -38,9 +37,7 @@ export class MyMaterialShader extends cs380.BaseShader {
     this.specularR = specularR;
     this.specularG = specularG;
     this.specularB = specularB;
-    this.shininessR = shininessR;
-    this.shininessG = shininessG;
-    this.shininessB = shininessB;
+    this.shininess = shininess;
   }
 
   generateUniformLocations() {
@@ -66,15 +63,15 @@ export class MyMaterialShader extends cs380.BaseShader {
     this.setUniformFloat(kv, "ambientR", this.ambientR);
     this.setUniformFloat(kv, "diffuseR", this.diffuseR);
     this.setUniformFloat(kv, "specularR", this.specularR);
-    this.setUniformFloat(kv, "shininessR", this.shininessR);
+    //this.setUniformFloat(kv, "shininessR", this.shininessR);
     this.setUniformFloat(kv, "ambientG", this.ambientG);
     this.setUniformFloat(kv, "diffuseG", this.diffuseG);
     this.setUniformFloat(kv, "specularG", this.specularG);
-    this.setUniformFloat(kv, "shininessG", this.shininessG);
+    //this.setUniformFloat(kv, "shininessG", this.shininessG);
     this.setUniformFloat(kv, "ambientB", this.ambientB);
     this.setUniformFloat(kv, "diffuseB", this.diffuseB);
     this.setUniformFloat(kv, "specularB", this.specularB);
-    this.setUniformFloat(kv, "shininessB", this.shininessB);
+    this.setUniformFloat(kv, "shininess", this.shininess);
 
     if ("lights" in kv) {
       const lights = kv["lights"];

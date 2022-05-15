@@ -45,8 +45,8 @@ export class BlinnPhongShader extends cs380.BaseShader {
   static get source() {
     // Define shader codes here
     return [
-      [gl.VERTEX_SHADER, "resources/my_material.vert"],
-      [gl.FRAGMENT_SHADER, "resources/my_material.frag"],
+      [gl.VERTEX_SHADER, "resources/blinn_phong.vert"],
+      [gl.FRAGMENT_SHADER, "resources/blinn_phong.frag"],
     ];
   }
 
