@@ -50,13 +50,25 @@ float random(vec3 seed) {
     return fract(sin(dot(seed, vec3(12.9898, 78.233, 45.5432))) * 43758.5453);
 }
 
-vec3 color2float(int r1, float rc, int g1, float gc, int b1, float bc) {
+
+vec3 color2float1(int r1, float rc, int g1, float gc, int b1, float bc) {
     float r2 = float(r1);
     float g2 = float(g1);
     float b2 = float(b1);
     float r = r2 * rc / 255.0;
     float g = g2 * gc / 255.0;
     float b = b2 * bc / 255.0;
+    return vec3(r, g, b);
+}
+
+
+vec3 color2float(int r1, int g1, int b1) {
+    float r2 = float(r1);
+    float g2 = float(g1);
+    float b2 = float(b1);
+    float r = r2 / 255.0;
+    float g = g2 / 255.0;
+    float b = b2 / 255.0;
     return vec3(r, g, b);
 }
 
@@ -102,7 +114,8 @@ void main() {
             //diffuse
             float NdotL = dot(N, L);
             float diffuse = max(NdotL * lights[i].illuminance, 0.0f);
-            intensity += color2float(lights[i].r,diffuseR, lights[i].g,diffuseG, lights[i].b,diffuseB) * diffuse * point;
+            //intensity += color2float(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * diffuse * point;
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * diffuse * point;
 
             //specular
             float specular = 0.0;
@@ -112,14 +125,14 @@ void main() {
             if(NdotL > 0.0) {
                 specular = pow(i2, shininess) * lights[i].illuminance;
             }
-            intensity += color2float(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * specular * point;
+            //intensity += color2float(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * specular * point;
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * specular * point;
         }
         else if (lights[i].type == SPOTLIGHT) {
             float angle = cos(radians(lights[i].angle));
-            vec4 lightDir = vec4(-lights[i].dir, 0);
+            vec4 lightDir = vec4(lights[i].dir, 0);
             vec4 lit = -frag_pos + vec4(lightPos, 1);
-            vec4 lit1 = -frag_pos + vec4(lights[i].pos, 1);
-            L = normalize((W2C * lit).xyz);
+            L = normalize((lit).xyz);
             vec3 D = normalize((W2C * lightDir).xyz);
             float angle_diff = abs(dot(L, D)); //cos
             float spot = 0.0;
@@ -129,20 +142,22 @@ void main() {
             }
 
             float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
-            intensity += color2float(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * i1 * spot;
+            //intensity += color2float(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * i1 * spot;
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i1 * spot;
 
             //specular
             vec3 V = normalize((-frag_pos).xyz);
             vec3 H = normalize(L + V);
             float i2 = max(dot(N, H), 0.0f);
             float i3 = pow(i2, shininess) * lights[i].illuminance;
-            intensity += color2float(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * i3 * spot;
+            //intensity += color2float(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * i3 * spot;
+            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i3 * spot;
         }
         else if (lights[i].type == AMBIENT) {
             // TODO: implement ambient reflection
             //intensity += mainColor * lights[i].illuminance;
-            intensity += color2float(lights[i].r, ambientR, lights[i].g, ambientG, lights[i].b, ambientB) * lights[i].illuminance;
-            //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * lights[i].illuminance;
+            //intensity += color2float(lights[i].r, ambientR, lights[i].g, ambientG, lights[i].b, ambientB) * lights[i].illuminance;
+            intensity += color2float1(lights[i].r, ambientR, lights[i].g, ambientG, lights[i].b, ambientB) * lights[i].illuminance;
         }
     }
     

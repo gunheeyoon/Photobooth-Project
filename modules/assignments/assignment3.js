@@ -47,10 +47,10 @@ export default class Assignment3 extends cs380.BaseApp {
     this.thingsToClear.push(blinnPhongShader);
 
     //my material shader
-    const materialAmbient = [1.0, 0.8, 1.0];
-    const materialDiffuse = [0.5, 0.5, 0.5];
-    const materialSpecular = [1.0, 0.8, 1.0];
-    const shine = 60.1;
+    const materialAmbient = [0.5, 0.5, 0.1];
+    const materialDiffuse = [1.0, 1.0, 1.0];
+    const materialSpecular = [1.0, 1.0, 1.0];
+    const shine = 100.0;
     const myMaterialShader = await cs380.buildShader(
       MyMaterialShader,
       ...materialAmbient,
@@ -111,7 +111,7 @@ export default class Assignment3 extends cs380.BaseApp {
     // initialize objects
     this.body = new cs380.PickableObject(
       bodyMesh,
-      blinnPhongShader,
+      myMaterialShader,
       pickingShader,
       1
     );
@@ -463,7 +463,7 @@ export default class Assignment3 extends cs380.BaseApp {
     const lightDir = vec3.create();
 
     const light0 = new Light();
-    light0.illuminance = 0.1;
+    light0.illuminance = 0.2;
     light0.color = [255, 165, 0];
     light0.r = 255;
     light0.g = 165;
@@ -517,6 +517,15 @@ export default class Assignment3 extends cs380.BaseApp {
     light4.angle = 10;
     light4.type = LightType.SPOTLIGHT;
     this.lights.push(light4);
+
+    const light5 = new Light();
+    light5.illuminance = 3;
+    light5.r = 0;
+    light5.g = 0;
+    light5.b = 255;
+    light5.transform.localPosition = [1, 0, -6];
+    light5.type = LightType.POINT;
+    this.lights.push(light5);
 
     this.body.uniforms.lights = this.lights;
     this.head.uniforms.lights = this.lights;

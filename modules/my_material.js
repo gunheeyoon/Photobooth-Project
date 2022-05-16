@@ -50,6 +50,16 @@ export class MyMaterialShader extends cs380.BaseShader {
       // Shader-specific uniforms
       mainColor: gl.getUniformLocation(this.program, "mainColor"),
       numLights: gl.getUniformLocation(this.program, "numLights"),
+      ambientR: gl.getUniformLocation(this.program, "ambientR"),
+      ambientG: gl.getUniformLocation(this.program, "ambientG"),
+      ambientB: gl.getUniformLocation(this.program, "ambientB"),
+      diffuseR: gl.getUniformLocation(this.program, "diffuseR"),
+      diffuseG: gl.getUniformLocation(this.program, "diffuseG"),
+      diffuseB: gl.getUniformLocation(this.program, "diffuseB"),
+      specularR: gl.getUniformLocation(this.program, "specularR"),
+      specularG: gl.getUniformLocation(this.program, "specularG"),
+      specularB: gl.getUniformLocation(this.program, "specularB"),
+      shininess: gl.getUniformLocation(this.program, "shininess"),
     };
   }
 
