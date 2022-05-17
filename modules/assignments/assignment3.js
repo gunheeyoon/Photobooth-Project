@@ -46,19 +46,33 @@ export default class Assignment3 extends cs380.BaseApp {
     const blinnPhongShader = await cs380.buildShader(BlinnPhongShader);
     this.thingsToClear.push(blinnPhongShader);
 
-    //my material shader
-    const materialAmbient = [0.5, 0.5, 0.1];
-    const materialDiffuse = [1.0, 1.0, 1.0];
-    const materialSpecular = [1.0, 1.0, 1.0];
-    const shine = 100.0;
-    const myMaterialShader = await cs380.buildShader(
+    //my material shader1
+    const materialAmbient1 = [1.0, 1.0, 1.0];
+    const materialDiffuse1 = [1.0, 1.0, 1.0];
+    const materialSpecular1 = [1.0, 1.0, 1.0];
+    const shine1 = 100.0;
+    const myMaterialShader1 = await cs380.buildShader(
       MyMaterialShader,
-      ...materialAmbient,
-      ...materialDiffuse,
-      ...materialSpecular,
-      shine
+      ...materialAmbient1,
+      ...materialDiffuse1,
+      ...materialSpecular1,
+      shine1
     );
-    this.thingsToClear.push(myMaterialShader);
+    this.thingsToClear.push(myMaterialShader1);
+
+    //my material shader2
+    const materialAmbient2 = [0.2, 0.2, 0.2];
+    const materialDiffuse2 = [0.3, 0.0, 1.0];
+    const materialSpecular2 = [0.7, 0.0, 0.7];
+    const shine2 = 10.0;
+    const myMaterialShader2 = await cs380.buildShader(
+      MyMaterialShader,
+      ...materialAmbient2,
+      ...materialDiffuse2,
+      ...materialSpecular2,
+      shine2
+    );
+    this.thingsToClear.push(myMaterialShader2);
 
     // cone mesh
     const coneMeshData = cs380.primitives.generateCone(64, 0.8, 1);
@@ -108,10 +122,19 @@ export default class Assignment3 extends cs380.BaseApp {
     const backgroundMesh = cs380.Mesh.fromData(backgroundMeshData);
     this.thingsToClear.push(backgroundMesh);
 
+    const cubeMeshData = cs380.primitives.generateCube(1, 1, 1);
+    const cubeMesh = cs380.Mesh.fromData(cubeMeshData);
+    this.thingsToClear.push(cubeMesh);
+
+    // pillar mesh
+    const pillarMeshData = cs380.primitives.generateCube(1, 7, 1);
+    const pillarMesh = cs380.Mesh.fromData(pillarMeshData);
+    this.thingsToClear.push(pillarMesh);
+
     // initialize objects
     this.body = new cs380.PickableObject(
       bodyMesh,
-      myMaterialShader,
+      blinnPhongShader,
       pickingShader,
       1
     );
@@ -282,6 +305,38 @@ export default class Assignment3 extends cs380.BaseApp {
       28
     );
 
+    this.cube1 = new cs380.PickableObject(
+      cubeMesh,
+      myMaterialShader1,
+      pickingShader,
+      29
+    );
+    this.cube2 = new cs380.PickableObject(
+      cubeMesh,
+      myMaterialShader2,
+      pickingShader,
+      30
+    );
+
+    this.pillar1 = new cs380.PickableObject(
+      pillarMesh,
+      myMaterialShader1,
+      pickingShader,
+      31
+    );
+    this.pillar2 = new cs380.PickableObject(
+      pillarMesh,
+      myMaterialShader2,
+      pickingShader,
+      32
+    );
+    this.pillar3 = new cs380.PickableObject(
+      pillarMesh,
+      myMaterialShader1,
+      pickingShader,
+      33
+    );
+
     // move around the objects
     let BODY = this.body.transform;
     let HEAD = this.head.transform;
@@ -408,6 +463,19 @@ export default class Assignment3 extends cs380.BaseApp {
     );
     vec3.set(this.floor.transform.localPosition, 0, -2, 0);
 
+    vec3.set(this.cube1.transform.localPosition, 3, -1, -6);
+    vec3.set(this.cube2.transform.localPosition, -3, -1, -6);
+
+    vec3.set(this.pillar1.transform.localPosition, 3, 0, -7);
+    vec3.set(this.pillar2.transform.localPosition, -3, 0, -7);
+    vec3.set(this.pillar3.transform.localPosition, 0, 4, -7);
+
+    quat.rotateZ(
+      this.pillar3.transform.localRotation,
+      this.pillar3.transform.localRotation,
+      -Math.PI / 2
+    );
+
     this.state = 0;
     this.cameraState = 0;
     this.transition = 0;
@@ -506,8 +574,8 @@ export default class Assignment3 extends cs380.BaseApp {
     const light4 = new Light();
     light4.illuminance = 0.5;
     light4.r = 0;
-    light4.g = 255;
-    light4.b = 0;
+    light4.g = 0;
+    light4.b = 255;
     light4.transform.localPosition = [0, 5, -4];
     quat.rotateX(
       light4.transform.localRotation,
@@ -521,11 +589,38 @@ export default class Assignment3 extends cs380.BaseApp {
     const light5 = new Light();
     light5.illuminance = 3;
     light5.r = 0;
-    light5.g = 0;
-    light5.b = 255;
-    light5.transform.localPosition = [1, 0, -6];
+    light5.g = 255;
+    light5.b = 0;
+    light5.transform.localPosition = [2, 0, -7];
     light5.type = LightType.POINT;
     this.lights.push(light5);
+
+    const light6 = new Light();
+    light6.illuminance = 3;
+    light6.r = 0;
+    light6.g = 255;
+    light6.b = 0;
+    light6.transform.localPosition = [-2, 0, -7];
+    light6.type = LightType.POINT;
+    this.lights.push(light6);
+
+    const light7 = new Light();
+    light7.illuminance = 3;
+    light7.r = 0;
+    light7.g = 255;
+    light7.b = 0;
+    light7.transform.localPosition = [2, 4, -7];
+    light7.type = LightType.POINT;
+    this.lights.push(light7);
+
+    const light8 = new Light();
+    light8.illuminance = 3;
+    light8.r = 0;
+    light8.g = 255;
+    light8.b = 0;
+    light8.transform.localPosition = [-2, 4, -7];
+    light8.type = LightType.POINT;
+    this.lights.push(light8);
 
     this.body.uniforms.lights = this.lights;
     this.head.uniforms.lights = this.lights;
@@ -550,6 +645,17 @@ export default class Assignment3 extends cs380.BaseApp {
     this.rightLowerLeg.uniforms.lights = this.lights;
     this.leftUpperLeg.uniforms.lights = this.lights;
     this.leftLowerLeg.uniforms.lights = this.lights;
+    this.rightHand.uniforms.lights = this.lights;
+    this.leftHand.uniforms.lights = this.lights;
+    this.rightFoot.uniforms.lights = this.lights;
+    this.leftFoot.uniforms.lights = this.lights;
+
+    this.cube1.uniforms.lights = this.lights;
+    this.cube2.uniforms.lights = this.lights;
+
+    this.pillar1.uniforms.lights = this.lights;
+    this.pillar2.uniforms.lights = this.lights;
+    this.pillar3.uniforms.lights = this.lights;
 
     // Event listener for interactions
     this.handleKeyDown = (e) => {
@@ -897,5 +1003,12 @@ export default class Assignment3 extends cs380.BaseApp {
 
     this.background.render(this.camera);
     this.floor.render(this.camera);
+
+    this.cube1.render(this.camera);
+    this.cube2.render(this.camera);
+
+    this.pillar1.render(this.camera);
+    this.pillar2.render(this.camera);
+    this.pillar3.render(this.camera);
   }
 }

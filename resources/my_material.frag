@@ -114,8 +114,8 @@ void main() {
             //diffuse
             float NdotL = dot(N, L);
             float diffuse = max(NdotL * lights[i].illuminance, 0.0f);
-            //intensity += color2float(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * diffuse * point;
-            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * diffuse * point;
+            intensity += color2float1(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * diffuse * point;
+            //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * diffuse * point;
 
             //specular
             float specular = 0.0;
@@ -126,7 +126,7 @@ void main() {
                 specular = pow(i2, shininess) * lights[i].illuminance;
             }
             //intensity += color2float(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * specular * point;
-            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * specular * point;
+            intensity += color2float1(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * specular * point;
         }
         else if (lights[i].type == SPOTLIGHT) {
             float angle = cos(radians(lights[i].angle));
@@ -142,8 +142,8 @@ void main() {
             }
 
             float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
-            //intensity += color2float(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * i1 * spot;
-            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i1 * spot;
+            intensity += color2float1(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * i1 * spot;
+            //intensity += color2float1(lights[i].r, lights[i].g, lights[i].b) * i1 * spot;
 
             //specular
             vec3 V = normalize((-frag_pos).xyz);
@@ -151,7 +151,7 @@ void main() {
             float i2 = max(dot(N, H), 0.0f);
             float i3 = pow(i2, shininess) * lights[i].illuminance;
             //intensity += color2float(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * i3 * spot;
-            intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i3 * spot;
+            intensity += color2float1(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * i3 * spot;
         }
         else if (lights[i].type == AMBIENT) {
             // TODO: implement ambient reflection
