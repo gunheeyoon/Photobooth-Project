@@ -73,11 +73,9 @@ export class MyMaterialShader extends cs380.BaseShader {
     this.setUniformFloat(kv, "ambientR", this.ambientR);
     this.setUniformFloat(kv, "diffuseR", this.diffuseR);
     this.setUniformFloat(kv, "specularR", this.specularR);
-    //this.setUniformFloat(kv, "shininessR", this.shininessR);
     this.setUniformFloat(kv, "ambientG", this.ambientG);
     this.setUniformFloat(kv, "diffuseG", this.diffuseG);
     this.setUniformFloat(kv, "specularG", this.specularG);
-    //this.setUniformFloat(kv, "shininessG", this.shininessG);
     this.setUniformFloat(kv, "ambientB", this.ambientB);
     this.setUniformFloat(kv, "diffuseB", this.diffuseB);
     this.setUniformFloat(kv, "specularB", this.specularB);

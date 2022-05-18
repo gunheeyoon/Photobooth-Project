@@ -90,16 +90,18 @@ void main() {
             vec4 lit = vec4(-lights[i].dir, 0);
             L = normalize((W2C * lit).xyz);
             float i1 = max(dot(N, L) * lights[i].illuminance, 0.0f);
-            intensity += mainColor * i1;
+            //intensity += mainColor * i1;
             //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i1;
+            intensity += color2float1(lights[i].r, diffuseR, lights[i].g, diffuseG, lights[i].b, diffuseB) * i1;
 
             //specular
             vec3 V = normalize((-frag_pos).xyz);
             vec3 H = normalize(L + V);
             float i2 = max(dot(N, H), 0.0f);
             float i3 = pow(i2, shininess) * lights[i].illuminance;
-            intensity += mainColor * i3;
+            //intensity += mainColor * i3;
             //intensity += color2float(lights[i].r, lights[i].g, lights[i].b) * i3;
+            intensity += color2float1(lights[i].r, specularR, lights[i].g, specularG, lights[i].b, specularB) * i3;
         }
         else if (lights[i].type == POINT) {
             vec4 lit = -frag_pos + W2C * vec4(lights[i].pos, 1);

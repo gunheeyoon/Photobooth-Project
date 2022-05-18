@@ -68,11 +68,34 @@ export default class Lab6App extends cs380.BaseApp {
 
     const light1 = new Light();
     vec3.set(lightDir, -1, -1, -1);
-    light1.illuminance = 0.9;
-    light1.color = [1, 1, 1];
+    light1.illuminance = 0.0;
+    light1.r = 255;
+    light1.g = 0;
+    light1.b = 0;
     light1.transform.lookAt(lightDir);
     light1.type = LightType.DIRECTIONAL;
     this.lights.push(light1);
+
+    const light2 = new Light();
+    vec3.set(light2.transform.localPosition, 0, 0, 1);
+    light2.illuminance = 0.0;
+    light2.r = 0;
+    light2.g = 255;
+    light2.b = 0;
+    light2.type = LightType.POINT;
+    this.lights.push(light2);
+
+    const light3 = new Light();
+    light3.illuminance = 0.9;
+    light3.r = 0;
+    light3.g = 255;
+    light3.b = 0;
+    light3.transform.localPosition = [1, 1, 1];
+    light3.transform.lookAt([0, -1, -1]);
+    light3.angle = 20; // in degrees
+    light3.angleSmoothness = 5;
+    light3.type = LightType.SPOTLIGHT;
+    this.lights.push(light3);
 
     // initialize a sphere Object
     this.sphere = new cs380.PickableObject(
