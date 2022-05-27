@@ -4,7 +4,7 @@ layout(location = 0) in vec3 in_pos;
 layout(location = 1) in vec3 in_normal;
 
 //TODO: layout for uv iput
-layout(location = 2) in vec2 in_uv;
+layout(location = 2) in vec2 in_uv; 
 
 out vec4 frag_pos;
 out vec4 frag_normal;

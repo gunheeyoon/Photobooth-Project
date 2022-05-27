@@ -40,7 +40,9 @@ export class Transform {
       var pWorldMatrix = this.parent.worldMatrix;
 
       var scaleInverse = mat4.create();
-      mat4.fromScaling(scaleInverse, this.parent.localScale);
+      var parentInverse = vec3.create();
+      vec3.inverse(parentInverse, this.parent.localScale);
+      mat4.fromScaling(scaleInverse, parentInverse);
 
       var mp = mat4.create();
       var rot = mat4.create();

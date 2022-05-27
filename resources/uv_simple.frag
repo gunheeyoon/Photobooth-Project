@@ -11,8 +11,7 @@ uniform sampler2D mainTexture;
 
 void main() {
   // TODO: set albedo from texture
-  //vec4 albedo = vec4(1.0, 1.0, 1.0, 1.0); //change this code correctly
-  vec4 albedo = texture(mainTexture, texCoord);
+    vec4 albedo = texture(mainTexture, texCoord);
 
   vec4 world_light_dir = vec4(1.0, 1.0, 1.0, 0.0);
   mat4 W2C = inverse(cameraTransform);
