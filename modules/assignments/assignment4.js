@@ -7,6 +7,30 @@ import { UnlitTextureShader } from "../unlit_texture_shader.js";
 import { LightType, Light, BlinnPhongShader } from "../blinn_phong.js";
 import { SimpleShader } from "../simple_shader.js";
 import { MyMaterialShader } from "../my_material.js";
+import { Skybox, SkyboxShader } from "../skybox_shader.js";
+
+class TextureShader extends cs380.BaseShader {
+  static get source() {
+    return [
+      [gl.VERTEX_SHADER, "resources/uv_simple.vert"],
+      [gl.FRAGMENT_SHADER, "resources/uv_simple.frag"],
+    ];
+  }
+  generateUniformLocations() {
+    return {
+      projectionMatrix: gl.getUniformLocation(this.program, "projectionMatrix"),
+      cameraTransform: gl.getUniformLocation(this.program, "cameraTransform"),
+      modelTransform: gl.getUniformLocation(this.program, "modelTransform"),
+      mainTexture: gl.getUniformLocation(this.program, "mainTexture"),
+    };
+  }
+  setUniforms(kv) {
+    this.setUniformMat4(kv, "projectionMatrix");
+    this.setUniformMat4(kv, "cameraTransform");
+    this.setUniformMat4(kv, "modelTransform");
+    this.setUniformTexture(kv, "mainTexture", 0);
+  }
+}
 
 class Framebuffer {
   constructor() {
@@ -153,6 +177,9 @@ class PhotoFilm {
 
 export default class Assignment4 extends cs380.BaseApp {
   async initialize() {
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+
     // Basic setup for camera
     const { width, height } = gl.canvas.getBoundingClientRect();
     const aspectRatio = width / height;
@@ -178,6 +205,53 @@ export default class Assignment4 extends cs380.BaseApp {
     this.thingsToClear.push(this.photo);
 
     // TODO: initialize your object + scene here
+
+    // SKYBOX
+    const textureLoader = cs380.TextureLoader.load({
+      uv_checker: "resources/uv_checker.png",
+
+      posX: "resources/skybox/right.jpg",
+      negX: "resources/skybox/left.jpg",
+      posY: "resources/skybox/top.jpg",
+      negY: "resources/skybox/bottom.jpg",
+      posZ: "resources/skybox/front.jpg",
+      negZ: "resources/skybox/back.jpg",
+    });
+
+    const shaderLoader = cs380.ShaderLoader.load({
+      skyboxShader: SkyboxShader.source,
+      textureShader: TextureShader.source,
+    });
+
+    const loaderResult = await Promise.all([textureLoader, shaderLoader]);
+    const textureLoaderResult = loaderResult[0];
+    const shaderLoaderResult = loaderResult[1];
+
+    // create Skybox
+    // generate cubemap texture
+    const cubemap = new cs380.Cubemap();
+    this.thingsToClear.push(cubemap);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    cubemap.initialize([
+      [gl.TEXTURE_CUBE_MAP_POSITIVE_X, textureLoaderResult.posX],
+      [gl.TEXTURE_CUBE_MAP_NEGATIVE_X, textureLoaderResult.negX],
+      [gl.TEXTURE_CUBE_MAP_POSITIVE_Y, textureLoaderResult.posY],
+      [gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, textureLoaderResult.negY],
+      [gl.TEXTURE_CUBE_MAP_POSITIVE_Z, textureLoaderResult.posZ],
+      [gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, textureLoaderResult.negZ],
+    ]);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    const skyboxShader = new SkyboxShader();
+    this.thingsToClear.push(skyboxShader);
+    skyboxShader.initialize(shaderLoaderResult.skyboxShader);
+
+    const cubeMeshData = cs380.primitives.generateCube();
+    const skyboxMesh = cs380.Mesh.fromData(cubeMeshData);
+
+    this.thingsToClear.push(skyboxMesh);
+    this.skybox = new Skybox(skyboxMesh, skyboxShader);
+    this.skybox.uniforms.mainTexture = cubemap.id;
 
     // SimpleOrbitControl
     const orbitControlCenter = vec3.fromValues(0, 0, 0);
@@ -277,8 +351,8 @@ export default class Assignment4 extends cs380.BaseApp {
     const backgroundMesh = cs380.Mesh.fromData(backgroundMeshData);
     this.thingsToClear.push(backgroundMesh);
 
-    const cubeMeshData = cs380.primitives.generateCube(1, 1, 1);
-    const cubeMesh = cs380.Mesh.fromData(cubeMeshData);
+    const cubeMeshData1 = cs380.primitives.generateCube(1, 1, 1);
+    const cubeMesh = cs380.Mesh.fromData(cubeMeshData1);
     this.thingsToClear.push(cubeMesh);
 
     // pillar mesh
@@ -861,9 +935,9 @@ export default class Assignment4 extends cs380.BaseApp {
     `;
 
     // GL settings
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
-    gl.frontFace(gl.CCW);
+    //gl.enable(gl.CULL_FACE);
+    //gl.cullFace(gl.BACK);
+    //gl.frontFace(gl.CCW);
 
     const shutterAudio = document.getElementById("shutter-sfx");
     document.getElementById("shutter").onclick = () => {
@@ -1147,6 +1221,7 @@ export default class Assignment4 extends cs380.BaseApp {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // renderPicking() here
+    /*
     this.body.renderPicking(this.camera);
     this.head.renderPicking(this.camera);
     this.rightUpperArm.renderPicking(this.camera);
@@ -1157,6 +1232,7 @@ export default class Assignment4 extends cs380.BaseApp {
     this.leftUpperLeg.renderPicking(this.camera);
     this.rightLowerLeg.renderPicking(this.camera);
     this.leftLowerLeg.renderPicking(this.camera);
+    */
 
     // Render effect-applied scene to framebuffer of the photo if shutter is pressed
     if (this.shutterPressed) {
@@ -1186,6 +1262,7 @@ export default class Assignment4 extends cs380.BaseApp {
     this.avatar.render(this.camera);
     ...
     */
+    this.skybox.render(this.camera);
 
     this.body.render(this.camera);
     this.head.render(this.camera);
