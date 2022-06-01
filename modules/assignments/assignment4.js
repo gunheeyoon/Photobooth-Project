@@ -99,6 +99,44 @@ class Framebuffer {
   }
 }
 
+class Pip {
+  async initialize(width, height, trans, scale) {
+    this.framebuffer = new Framebuffer();
+    this.framebuffer.initialize(width, height);
+
+    const planeMeshData = cs380.primitives.generatePlane(1, 1);
+    const planeMesh = cs380.Mesh.fromData(planeMeshData);
+    const shader = await cs380.buildShader(PipEdgeShader);
+
+    this.transform = new cs380.Transform();
+    quat.rotateY(this.transform.localRotation, quat.create(), Math.PI);
+
+    this.image = new cs380.RenderObject(planeMesh, shader);
+    this.image.uniforms.useScreenSpace = true;
+    this.image.uniforms.useColor = false;
+    this.image.uniforms.mainTexture = this.framebuffer.colorTexture;
+    this.image.uniforms.width = width;
+    this.image.uniforms.height = height;
+    this.image.transform.localPosition = trans;
+    this.image.transform.localScale = scale;
+    this.image.transform.setParent(this.transform);
+
+    this.thingsToClear = [shader, planeMesh, this.framebuffer];
+  }
+
+  render(camera) {
+    const prevDepthFunc = gl.getParameter(gl.DEPTH_FUNC);
+    gl.depthFunc(gl.ALWAYS);
+    this.image.render(camera);
+    gl.depthFunc(prevDepthFunc);
+  }
+  finalize() {
+    for (const thing of this.thingsToClear) {
+      thing.finalize();
+    }
+  }
+}
+
 class PhotoFilm {
   async initialize(width, height) {
     this.enabled = false;
