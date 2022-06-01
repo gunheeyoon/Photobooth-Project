@@ -8,6 +8,7 @@ import { LightType, Light, BlinnPhongShader } from "../blinn_phong.js";
 import { SimpleShader } from "../simple_shader.js";
 import { MyMaterialShader } from "../my_material.js";
 import { Skybox, SkyboxShader } from "../skybox_shader.js";
+import { PipEdgeShader } from "../pip_edge_shader.js";
 
 class TextureShader extends cs380.BaseShader {
   static get source() {
@@ -220,6 +221,9 @@ export default class Assignment4 extends cs380.BaseApp {
 
     // Basic setup for camera
     const { width, height } = gl.canvas.getBoundingClientRect();
+    this.width = width;
+    this.height = height;
+
     const aspectRatio = width / height;
     this.camera = new cs380.Camera();
     vec3.set(this.camera.transform.localPosition, 0, 2, 9);
@@ -397,6 +401,16 @@ export default class Assignment4 extends cs380.BaseApp {
     const pillarMeshData = cs380.primitives.generateCube(1, 7, 1);
     const pillarMesh = cs380.Mesh.fromData(pillarMeshData);
     this.thingsToClear.push(pillarMesh);
+
+    //create pip
+    this.picture = new Pip();
+    this.thingsToClear.push(this.picture);
+    await this.picture.initialize(
+      width,
+      height,
+      vec3.fromValues(0.0, 0.75, 0.0), //translation
+      vec3.fromValues(0.5, 0.5, 0.5)
+    ); //scale
 
     // initialize objects
     this.body = new cs380.PickableObject(
@@ -1285,6 +1299,7 @@ export default class Assignment4 extends cs380.BaseApp {
 
     // Render effect-applied scene to the screen
     this.renderImage(null);
+    this.renderImage(this.picture.framebuffer.fbo);
 
     // Photos are rendered at the very last
     this.photo.update(elapsed);
@@ -1301,6 +1316,7 @@ export default class Assignment4 extends cs380.BaseApp {
     ...
     */
     this.skybox.render(this.camera);
+    this.picture.render(this.camera);
 
     this.body.render(this.camera);
     this.head.render(this.camera);
