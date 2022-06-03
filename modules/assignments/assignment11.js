@@ -36,22 +36,21 @@ export default class Assignment1 extends cs380.BaseApp {
     /* background */
     this.mesh = new cs380.Mesh();
 
-    const buildBackground = () => {
+    
       this.mesh.addAttribute(3); //position
       this.mesh.addAttribute(3); //color
       const triangle1 = [
-        2, -2, -2, 1, 0, 0, -2, -2, -2, 0, 1, 0, 2, 2, -2, 0, 0, 1,
+        2, -2, -2, 1, 0, 0, 2, 2, -2, 0, 1, 0, -2, -2, -2, 0, 0, 1,
       ];
       this.mesh.addVertexData(...triangle1);
       const triangle2 = [
-        2, 2, -2, 0, 0, 1, -2, -2, -2, 0, 1, 0, -2, 2, -2, 1, 0, 0,
+        2, 2, -2, 0, 0, 1, -2, 2, -2, 0, 1, 0, -2, -2, -2, 1, 0, 0,
       ];
       this.mesh.addVertexData(...triangle2);
       this.mesh.drawMode = gl.TRIANGLES;
       this.mesh.initialize();
-    };
+    
 
-    buildBackground();
     this.shader = await cs380.buildShader(VertexColorShader);
     this.background = new cs380.RenderObject(this.mesh, this.shader);
 
@@ -201,6 +200,7 @@ export default class Assignment1 extends cs380.BaseApp {
 
     // Rest of rendering below
     this.background.render(this.camera);
+
     for (let i = 0; i < this.numOfFractal1; i++) {
       this.starArray[i].render(this.camera);
     }

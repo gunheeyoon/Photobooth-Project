@@ -102,6 +102,34 @@ class Framebuffer {
   }
 }
 
+class AnimatedBackground {
+  async initialize() {
+    this.mesh = new cs380.Mesh();
+
+    
+      this.mesh.addAttribute(3); //position
+      this.mesh.addAttribute(3); //color
+      const triangle1 = [
+        5, -5, -2, 1, 0, 0, 5, 5, -2, 0, 1, 0, -5, -5, -2, 0, 0, 1,
+      ];
+      this.mesh.addVertexData(...triangle1);
+      const triangle2 = [
+        5, 5, -2, 0, 1, 0, -5, 5, -2, 1, 0, 0, -5, -5, -2, 0, 0, 1,
+      ];
+      this.mesh.addVertexData(...triangle2);
+      this.mesh.drawMode = gl.TRIANGLES;
+      this.mesh.initialize();
+    
+
+    this.shader = await cs380.buildShader(VertexColorShader);
+    this.background = new cs380.RenderObject(this.mesh, this.shader);
+  }
+
+  render(camera) {
+    this.background.render(camera);
+  }
+}
+
 class Pip {
   async initialize(width, height, trans, scale) {
     this.framebuffer = new Framebuffer();
@@ -414,6 +442,42 @@ export default class Assignment4 extends cs380.BaseApp {
       vec3.fromValues(0.0, 0.75, 4.0), //translation
       vec3.fromValues(5.0, 5.0, 5.0)   //scale
     ); 
+
+    this.animatedBackground = new AnimatedBackground();
+    await this.animatedBackground.initialize();
+
+    /*-----------------------------------------
+
+    this.mesh = new cs380.Mesh();
+    this.mesh.addAttribute(3); // position
+    this.mesh.addAttribute(3); //color
+    this.mesh.addVertexData(
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    );
+    this.mesh.initialize();
+
+    this.shader = await cs380.buildShader(VertexColorShader);
+
+    this.triangle = new cs380.RenderObject(this.mesh, this.shader);
+
+    /*-----------------------------------------*/
 
     // initialize objects
     this.body = new cs380.PickableObject(
@@ -1378,7 +1442,8 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       if(background) {
-        this.skybox.render(this.camera);
+        //this.skybox.render(this.camera);
+        this.animatedBackground.render(this.camera);
       }
       else {
         this.renderScene();
