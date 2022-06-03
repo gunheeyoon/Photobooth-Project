@@ -6,9 +6,11 @@ import * as cs380 from "../cs380/cs380.js";
 import { UnlitTextureShader } from "../unlit_texture_shader.js";
 import { LightType, Light, BlinnPhongShader } from "../blinn_phong.js";
 import { SimpleShader } from "../simple_shader.js";
+import { VertexColorShader } from "../vertex_color_shader.js";
 import { MyMaterialShader } from "../my_material.js";
 import { Skybox, SkyboxShader } from "../skybox_shader.js";
 import { PipEdgeShader } from "../pip_edge_shader.js";
+import { PipShader } from "../pip_shader.js";
 
 class TextureShader extends cs380.BaseShader {
   static get source() {
@@ -107,13 +109,14 @@ class Pip {
 
     const planeMeshData = cs380.primitives.generatePlane(1, 1);
     const planeMesh = cs380.Mesh.fromData(planeMeshData);
-    const shader = await cs380.buildShader(PipEdgeShader);
+    //const shader = await cs380.buildShader(PipEdgeShader);
+    const shader = await cs380.buildShader(PipShader);
 
     this.transform = new cs380.Transform();
     quat.rotateY(this.transform.localRotation, quat.create(), Math.PI);
 
     this.image = new cs380.RenderObject(planeMesh, shader);
-    this.image.uniforms.useScreenSpace = true;
+    //this.image.uniforms.useScreenSpace = true;
     this.image.uniforms.useColor = false;
     this.image.uniforms.mainTexture = this.framebuffer.colorTexture;
     this.image.uniforms.width = width;
@@ -389,7 +392,7 @@ export default class Assignment4 extends cs380.BaseApp {
     this.thingsToClear.push(eyeMesh);
 
     // background mesh
-    const backgroundMeshData = cs380.primitives.generateCube(20, 20, 0.5);
+    const backgroundMeshData = cs380.primitives.generateCube(8, 8, 0.5);
     const backgroundMesh = cs380.Mesh.fromData(backgroundMeshData);
     this.thingsToClear.push(backgroundMesh);
 
@@ -408,9 +411,9 @@ export default class Assignment4 extends cs380.BaseApp {
     await this.picture.initialize(
       width,
       height,
-      vec3.fromValues(0.0, 0.75, 0.0), //translation
-      vec3.fromValues(0.5, 0.5, 0.5)
-    ); //scale
+      vec3.fromValues(0.0, 0.75, 4.0), //translation
+      vec3.fromValues(5.0, 5.0, 5.0)   //scale
+    ); 
 
     // initialize objects
     this.body = new cs380.PickableObject(
@@ -736,7 +739,7 @@ export default class Assignment4 extends cs380.BaseApp {
     vec3.set(this.eye2.transform.localPosition, -0.1, 0.1, 0.25);
     vec3.set(this.mouth.transform.localPosition, 0, -0.1, 0.25);
 
-    vec3.set(this.background.transform.localPosition, 0, 0, -10);
+    vec3.set(this.background.transform.localPosition, 0, 1.5, -5.5);
     quat.rotateX(
       this.floor.transform.localRotation,
       this.floor.transform.localRotation,
@@ -744,12 +747,12 @@ export default class Assignment4 extends cs380.BaseApp {
     );
     vec3.set(this.floor.transform.localPosition, 0, -2, 0);
 
-    vec3.set(this.cube1.transform.localPosition, 3, -1, -6);
-    vec3.set(this.cube2.transform.localPosition, -3, -1, -6);
+    vec3.set(this.cube1.transform.localPosition, 3, -1, -3.5);
+    vec3.set(this.cube2.transform.localPosition, -3, -1, -3.5);
 
-    vec3.set(this.pillar1.transform.localPosition, 3, 0, -7);
-    vec3.set(this.pillar2.transform.localPosition, -3, 0, -7);
-    vec3.set(this.pillar3.transform.localPosition, 0, 4, -7);
+    vec3.set(this.pillar1.transform.localPosition, 3, 0, -4.5);
+    vec3.set(this.pillar2.transform.localPosition, -3, 0, -4.5);
+    vec3.set(this.pillar3.transform.localPosition, 0, 4, -4.5);
 
     quat.rotateZ(
       this.pillar3.transform.localRotation,
@@ -850,7 +853,7 @@ export default class Assignment4 extends cs380.BaseApp {
     light3.angle = 20; // in degrees
     light3.angleSmoothness = 5;
     light3.type = LightType.SPOTLIGHT;
-    //this.lights.push(light3);
+    this.lights.push(light3);
 
     const light4 = new Light();
     light4.illuminance = 0.5;
@@ -872,7 +875,7 @@ export default class Assignment4 extends cs380.BaseApp {
     light5.r = 0;
     light5.g = 255;
     light5.b = 0;
-    light5.transform.localPosition = [2, 0, -7];
+    light5.transform.localPosition = [2, 0, -4];
     light5.type = LightType.POINT;
     this.lights.push(light5);
 
@@ -881,7 +884,7 @@ export default class Assignment4 extends cs380.BaseApp {
     light6.r = 0;
     light6.g = 255;
     light6.b = 0;
-    light6.transform.localPosition = [-2, 0, -7];
+    light6.transform.localPosition = [-2, 0, -4];
     light6.type = LightType.POINT;
     this.lights.push(light6);
 
@@ -890,7 +893,7 @@ export default class Assignment4 extends cs380.BaseApp {
     light7.r = 0;
     light7.g = 255;
     light7.b = 0;
-    light7.transform.localPosition = [2, 4, -7];
+    light7.transform.localPosition = [2, 4, -4];
     light7.type = LightType.POINT;
     this.lights.push(light7);
 
@@ -899,7 +902,7 @@ export default class Assignment4 extends cs380.BaseApp {
     light8.r = 0;
     light8.g = 255;
     light8.b = 0;
-    light8.transform.localPosition = [-2, 4, -7];
+    light8.transform.localPosition = [-2, 4, -4];
     light8.type = LightType.POINT;
     this.lights.push(light8);
 
@@ -1299,7 +1302,7 @@ export default class Assignment4 extends cs380.BaseApp {
 
     // Render effect-applied scene to the screen
     this.renderImage(null);
-    this.renderImage(this.picture.framebuffer.fbo);
+    this.renderImage(this.picture.framebuffer.fbo, null, null, true); //animated background
 
     // Photos are rendered at the very last
     this.photo.update(elapsed);
@@ -1356,7 +1359,7 @@ export default class Assignment4 extends cs380.BaseApp {
     this.pillar3.render(this.camera);
   }
 
-  renderImage(fbo = null, width = null, height = null) {
+  renderImage(fbo = null, width = null, height = null, background = false) {
     // Parameters:
     //  * fbo: Target framebuffer object, default is to the canvas
     //  * width: Width of the target framebuffer, default is canvas'
@@ -1374,7 +1377,14 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.depthFunc(gl.LESS);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      this.renderScene();
+      if(background) {
+        this.skybox.render(this.camera);
+      }
+      else {
+        this.renderScene();
+      }
+
+      //this.renderScene();
     } else {
       // TODO: render the scene with some camera effect to the target framebuffer object (fbo)
       // Write at least one camera effect shader, which takes a rendered texture and draws modified version of the given texture
