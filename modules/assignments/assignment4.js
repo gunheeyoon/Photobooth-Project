@@ -11,6 +11,7 @@ import { MyMaterialShader } from "../my_material.js";
 import { Skybox, SkyboxShader } from "../skybox_shader.js";
 import { PipEdgeShader } from "../pip_edge_shader.js";
 import { PipShader } from "../pip_shader.js";
+import { SolidShader } from "../solid_shader.js";
 
 class TextureShader extends cs380.BaseShader {
   static get source() {
@@ -104,29 +105,133 @@ class Framebuffer {
 
 class AnimatedBackground {
   async initialize() {
+    // gradient background
     this.mesh = new cs380.Mesh();
 
+    this.mesh.addAttribute(3); //position
+    this.mesh.addAttribute(3); //color
+    const triangle1 = [
+      5, -5, -2, 1, 0, 0, 5, 5, -2, 0, 1, 0, -5, -5, -2, 0, 0, 1,
+    ];
+    this.mesh.addVertexData(...triangle1);
+    const triangle2 = [
+      5, 5, -2, 0, 1, 0, -5, 5, -2, 1, 0, 0, -5, -5, -2, 0, 0, 1,
+    ];
+    this.mesh.addVertexData(...triangle2);
+    this.mesh.drawMode = gl.TRIANGLES;
+    this.mesh.initialize();
     
-      this.mesh.addAttribute(3); //position
-      this.mesh.addAttribute(3); //color
-      const triangle1 = [
-        5, -5, -2, 1, 0, 0, 5, 5, -2, 0, 1, 0, -5, -5, -2, 0, 0, 1,
-      ];
-      this.mesh.addVertexData(...triangle1);
-      const triangle2 = [
-        5, 5, -2, 0, 1, 0, -5, 5, -2, 1, 0, 0, -5, -5, -2, 0, 0, 1,
-      ];
-      this.mesh.addVertexData(...triangle2);
-      this.mesh.drawMode = gl.TRIANGLES;
-      this.mesh.initialize();
-    
-
     this.shader = await cs380.buildShader(VertexColorShader);
     this.background = new cs380.RenderObject(this.mesh, this.shader);
+
+    // falling stars
+    this.numOfStars = 100;
+    this.fractalShader = await cs380.buildShader(SolidShader);
+    this.fractalMesh1 = new cs380.Mesh();
+    this.fractalMesh1.addAttribute(3); //position
+
+    const buildStar = (N) => {
+      this.fractalMesh1.addVertexData(0, 0, 1);
+      for (let k = 0; k < 2 * N + 1; k++) {
+        const angle = (Math.PI * 2 * k) / (2 * N);
+        if (k % 2 == 0) var n = 0.5;
+        else var n = 0.25;
+        const p_i = vec3.fromValues(
+          (n * Math.cos(angle)) / 4,
+          (n * Math.sin(angle)) / 4,
+          1
+        );
+
+        this.fractalMesh1.addVertexData(...p_i);
+      }
+
+      this.fractalMesh1.drawMode = gl.TRIANGLE_FAN;
+      this.fractalMesh1.initialize();
+    };
+
+    buildStar(7);
+
+    this.starArray = [];
+    var x, y;
+    for (let i = 0; i < this.numOfStars; i++) {
+      var fractal1 = new cs380.RenderObject(this.fractalMesh1, this.fractalShader);
+      fractal1.uniforms.mainColor = [168 / 255, 244 / 255, 245 / 255];
+
+      x = Math.random() * 5 - 2.5;
+      y = Math.random() * 10;
+
+      vec3.set(fractal1.transform.localPosition, x, y, 1);
+
+      this.starArray.push(fractal1);
+    }
+
+    // fractal
+    this.fractalDepth = 13;
+    this.fractalNum = Math.pow(2, this.fractalDepth) - 1;
+    this.fractalMesh2 = new cs380.Mesh();
+    
+    this.fractalMesh2.addAttribute(3); //position
+
+    const coordinate = [0.05, -0.7, 0, -0.05, -0.7, 0, -0.05, -5, 0, 0.05, -5, 0];
+    const t1 = [coordinate[0], coordinate[1], coordinate[2], coordinate[3], coordinate[4], coordinate[5], coordinate[9], coordinate[10], coordinate[11]];
+    const t2 = [coordinate[3], coordinate[4], coordinate[5], coordinate[6], coordinate[7], coordinate[8], coordinate[9], coordinate[10], coordinate[11]];
+    this.fractalMesh2.addVertexData(...t1);
+    this.fractalMesh2.addVertexData(...t2);
+    this.fractalMesh2.drawMode = gl.TRIANGLES;
+    this.fractalMesh2.initialize();
+
+    this.fractalArray = [];
+
+    const buildFractal = () => {
+
+      for (let i = 0; i < this.fractalNum; i++) {
+        const fractal = new cs380.RenderObject(this.fractalMesh2, this.fractalShader);
+        fractal.uniforms.mainColor = [206/255, 222/255, 60/255];
+        this.fractalArray.push(fractal);
+      }
+
+      const recursion = (rec, start, finish) => {
+        if (rec > 0) {
+          const mid = Math.floor((start + finish) / 2);
+
+          for(let i = start; i < mid + 1; i++) {
+            const T1 = this.fractalArray[i].transform;
+            vec3.set(T1.localPosition, T1.localPosition[0], T1.localPosition[1], 0);
+            quat.rotateZ(T1.localRotation, T1.localRotation, -155 * Math.PI / 180);
+            vec3.scale(T1.localScale, T1.localScale, 0.9);
+          }
+          for(let j = mid + 1; j < finish + 1; j++) {
+            const T2 = this.fractalArray[j].transform;
+            vec3.set(T2.localPosition, T2.localPosition[0], T2.localPosition[1], 0);
+            quat.rotateZ(T2.localRotation, T2.localRotation, 125 * Math.PI / 180);
+            vec3.scale(T2.localScale, T2.localScale, 0.9);
+          }
+
+          recursion(rec - 1, start + 1, mid);
+          recursion(rec - 1, mid + 2, finish);
+        }
+        else {
+
+        }
+      }
+
+      recursion(this.fractalDepth, 1, this.fractalNum - 1);
+    }
+
+    buildFractal();
+
   }
 
   render(camera) {
     this.background.render(camera);
+    
+    for (let i = 0; i < this.numOfStars; i++) {
+      this.starArray[i].render(camera);
+    }
+    
+    for (let j = 1; j < this.fractalNum; j++) {
+      this.fractalArray[j].render(camera);
+    }
   }
 }
 
@@ -445,39 +550,6 @@ export default class Assignment4 extends cs380.BaseApp {
 
     this.animatedBackground = new AnimatedBackground();
     await this.animatedBackground.initialize();
-
-    /*-----------------------------------------
-
-    this.mesh = new cs380.Mesh();
-    this.mesh.addAttribute(3); // position
-    this.mesh.addAttribute(3); //color
-    this.mesh.addVertexData(
-      0,
-      1,
-      0,
-      1,
-      0,
-      0,
-      -1,
-      0,
-      0,
-      0,
-      1,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1
-    );
-    this.mesh.initialize();
-
-    this.shader = await cs380.buildShader(VertexColorShader);
-
-    this.triangle = new cs380.RenderObject(this.mesh, this.shader);
-
-    /*-----------------------------------------*/
 
     // initialize objects
     this.body = new cs380.PickableObject(
@@ -1330,6 +1402,13 @@ export default class Assignment4 extends cs380.BaseApp {
         (-Math.PI * dt) / 3
       );
     }
+    
+    for (let k = 0; k < this.animatedBackground.numOfStars; k++) {
+      const T1 = this.animatedBackground.starArray[k].transform;
+      quat.rotateZ(T1.localRotation, T1.localRotation, Math.PI * dt);
+      vec3.set(T1.localPosition, T1.localPosition[0], T1.localPosition[1] - 0.3 * dt, 1);
+    }
+    
 
     // OPTIONAL: render PickableObject to the picking buffer here
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingBuffer.fbo);
