@@ -11,6 +11,7 @@ import { MyMaterialShader } from "../my_material.js";
 import { Skybox, SkyboxShader } from "../skybox_shader.js";
 import { PipEdgeShader } from "../pip_edge_shader.js";
 import { PipShader } from "../pip_shader.js";
+import { BlurShader } from "../blur_shader.js";
 import { SolidShader } from "../solid_shader.js";
 
 class TextureShader extends cs380.BaseShader {
@@ -274,6 +275,44 @@ class Pip {
   }
 }
 
+class Pip1 {
+  async initialize(width, height, trans, scale) {
+    this.framebuffer = new Framebuffer();
+    this.framebuffer.initialize(width, height);
+
+    const planeMeshData = cs380.primitives.generatePlane(1, 1);
+    const planeMesh = cs380.Mesh.fromData(planeMeshData);
+    const shader = await cs380.buildShader(BlurShader);
+
+    this.transform = new cs380.Transform();
+    quat.rotateY(this.transform.localRotation, quat.create(), Math.PI);
+
+    this.image = new cs380.RenderObject(planeMesh, shader);
+    this.image.uniforms.useScreenSpace = true;
+    this.image.uniforms.useColor = false;
+    this.image.uniforms.mainTexture = this.framebuffer.colorTexture;
+    this.image.uniforms.width = width;
+    this.image.uniforms.height = height;
+    this.image.transform.localPosition = trans;
+    this.image.transform.localScale = scale;
+    this.image.transform.setParent(this.transform);
+
+    this.thingsToClear = [shader, planeMesh, this.framebuffer];
+  }
+
+  render(camera) {
+    const prevDepthFunc = gl.getParameter(gl.DEPTH_FUNC);
+    gl.depthFunc(gl.ALWAYS);
+    this.image.render(camera);
+    gl.depthFunc(prevDepthFunc);
+  }
+  finalize() {
+    for (const thing of this.thingsToClear) {
+      thing.finalize();
+    }
+  }
+}
+
 class PhotoFilm {
   async initialize(width, height) {
     this.enabled = false;
@@ -381,6 +420,10 @@ export default class Assignment4 extends cs380.BaseApp {
     this.photo = new PhotoFilm();
     await this.photo.initialize(width, height);
     this.thingsToClear.push(this.photo);
+
+    this.cameraFrameBuffer = new Framebuffer();
+    this.cameraFrameBuffer.initialize(width, height);
+    this.thingsToClear.push(this.cameraFrameBuffer);
 
     // TODO: initialize your object + scene here
 
@@ -548,6 +591,11 @@ export default class Assignment4 extends cs380.BaseApp {
       vec3.fromValues(5.0, 5.0, 5.0)   //scale
     ); 
 
+    // create camera effect 1
+    this.camEffect1 = new Pip1();
+    this.thingsToClear.push(this.camEffect1);
+    await this.camEffect1.initialize(width, height, vec3.fromValues(0, 0, 0,), vec3.fromValues(1, 1, 1));
+    
     this.animatedBackground = new AnimatedBackground();
     await this.animatedBackground.initialize();
 
@@ -1446,6 +1494,7 @@ export default class Assignment4 extends cs380.BaseApp {
     // Render effect-applied scene to the screen
     this.renderImage(null);
     this.renderImage(this.picture.framebuffer.fbo, null, null, true); //animated background
+    this.renderImage(this.camEffect1.framebuffer.fbo, null, null, true);
 
     // Photos are rendered at the very last
     this.photo.update(elapsed);
@@ -1557,7 +1606,12 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.depthFunc(gl.LESS);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      this.renderScene();
+      if(background) {
+        this.animatedBackground.render(this.camera);
+      }
+      else {
+        this.renderScene();
+      }
     }
   }
 }
