@@ -16,15 +16,15 @@ void pixels_3by3(inout vec4 n[9], sampler2D tex, vec2 coord)
 
 	//TODO: get 9 pixels in vec4 array, with the center of current fragment
 	// Define n[0], n[1], ... n[8] respectively. Refer to the n[4] put correct coordinate to each pixel.
-	//n[0] = texture(tex, coord + vec2(-w, h));
-	//n[1] = texture(tex, coord + vec2(0.0f, h));
-	//n[2] = texture(tex, coord + vec2(w, h));
-	//n[3] = texture(tex, coord + vec2(-w, 0.0f));
+	n[0] = texture(tex, coord + vec2(-w, h));
+	n[1] = texture(tex, coord + vec2(0.0f, h));
+	n[2] = texture(tex, coord + vec2(w, h));
+	n[3] = texture(tex, coord + vec2(-w, 0.0f));
 	n[4] = texture(tex, coord);
-	//n[5] = texture(tex, coord + vec2(w, 0.0f));
-	//n[6] = texture(tex, coord + vec2(-w, -h));
-	//n[7] = texture(tex, coord + vec2(0.0f, -h));
-	//n[8] = texture(tex, coord + vec2(w, -h));
+	n[5] = texture(tex, coord + vec2(w, 0.0f));
+	n[6] = texture(tex, coord + vec2(-w, -h));
+	n[7] = texture(tex, coord + vec2(0.0f, -h));
+	n[8] = texture(tex, coord + vec2(w, -h));
 }
 
 void main() {

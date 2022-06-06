@@ -13,6 +13,7 @@ import { PipEdgeShader } from "../pip_edge_shader.js";
 import { PipShader } from "../pip_shader.js";
 import { BlurShader } from "../blur_shader.js";
 import { SolidShader } from "../solid_shader.js";
+import { SimpleOrbitControl } from "../cs380/utils.js";
 
 class TextureShader extends cs380.BaseShader {
   static get source() {
@@ -121,7 +122,7 @@ class AnimatedBackground {
     this.mesh.addVertexData(...triangle2);
     this.mesh.drawMode = gl.TRIANGLES;
     this.mesh.initialize();
-    
+
     this.shader = await cs380.buildShader(VertexColorShader);
     this.background = new cs380.RenderObject(this.mesh, this.shader);
 
@@ -155,7 +156,10 @@ class AnimatedBackground {
     this.starArray = [];
     var x, y;
     for (let i = 0; i < this.numOfStars; i++) {
-      var fractal1 = new cs380.RenderObject(this.fractalMesh1, this.fractalShader);
+      var fractal1 = new cs380.RenderObject(
+        this.fractalMesh1,
+        this.fractalShader
+      );
       fractal1.uniforms.mainColor = [168 / 255, 244 / 255, 245 / 255];
 
       x = Math.random() * 5 - 2.5;
@@ -170,12 +174,34 @@ class AnimatedBackground {
     this.fractalDepth = 13;
     this.fractalNum = Math.pow(2, this.fractalDepth) - 1;
     this.fractalMesh2 = new cs380.Mesh();
-    
+
     this.fractalMesh2.addAttribute(3); //position
 
-    const coordinate = [0.05, -0.7, 0, -0.05, -0.7, 0, -0.05, -5, 0, 0.05, -5, 0];
-    const t1 = [coordinate[0], coordinate[1], coordinate[2], coordinate[3], coordinate[4], coordinate[5], coordinate[9], coordinate[10], coordinate[11]];
-    const t2 = [coordinate[3], coordinate[4], coordinate[5], coordinate[6], coordinate[7], coordinate[8], coordinate[9], coordinate[10], coordinate[11]];
+    const coordinate = [
+      0.05, -0.7, 0, -0.05, -0.7, 0, -0.05, -5, 0, 0.05, -5, 0,
+    ];
+    const t1 = [
+      coordinate[0],
+      coordinate[1],
+      coordinate[2],
+      coordinate[3],
+      coordinate[4],
+      coordinate[5],
+      coordinate[9],
+      coordinate[10],
+      coordinate[11],
+    ];
+    const t2 = [
+      coordinate[3],
+      coordinate[4],
+      coordinate[5],
+      coordinate[6],
+      coordinate[7],
+      coordinate[8],
+      coordinate[9],
+      coordinate[10],
+      coordinate[11],
+    ];
     this.fractalMesh2.addVertexData(...t1);
     this.fractalMesh2.addVertexData(...t2);
     this.fractalMesh2.drawMode = gl.TRIANGLES;
@@ -184,10 +210,12 @@ class AnimatedBackground {
     this.fractalArray = [];
 
     const buildFractal = () => {
-
       for (let i = 0; i < this.fractalNum; i++) {
-        const fractal = new cs380.RenderObject(this.fractalMesh2, this.fractalShader);
-        fractal.uniforms.mainColor = [206/255, 222/255, 60/255];
+        const fractal = new cs380.RenderObject(
+          this.fractalMesh2,
+          this.fractalShader
+        );
+        fractal.uniforms.mainColor = [206 / 255, 222 / 255, 60 / 255];
         this.fractalArray.push(fractal);
       }
 
@@ -195,41 +223,56 @@ class AnimatedBackground {
         if (rec > 0) {
           const mid = Math.floor((start + finish) / 2);
 
-          for(let i = start; i < mid + 1; i++) {
+          for (let i = start; i < mid + 1; i++) {
             const T1 = this.fractalArray[i].transform;
-            vec3.set(T1.localPosition, T1.localPosition[0], T1.localPosition[1], 0);
-            quat.rotateZ(T1.localRotation, T1.localRotation, -155 * Math.PI / 180);
+            vec3.set(
+              T1.localPosition,
+              T1.localPosition[0],
+              T1.localPosition[1],
+              0
+            );
+            quat.rotateZ(
+              T1.localRotation,
+              T1.localRotation,
+              (-155 * Math.PI) / 180
+            );
             vec3.scale(T1.localScale, T1.localScale, 0.9);
           }
-          for(let j = mid + 1; j < finish + 1; j++) {
+          for (let j = mid + 1; j < finish + 1; j++) {
             const T2 = this.fractalArray[j].transform;
-            vec3.set(T2.localPosition, T2.localPosition[0], T2.localPosition[1], 0);
-            quat.rotateZ(T2.localRotation, T2.localRotation, 125 * Math.PI / 180);
+            vec3.set(
+              T2.localPosition,
+              T2.localPosition[0],
+              T2.localPosition[1],
+              0
+            );
+            quat.rotateZ(
+              T2.localRotation,
+              T2.localRotation,
+              (125 * Math.PI) / 180
+            );
             vec3.scale(T2.localScale, T2.localScale, 0.9);
           }
 
           recursion(rec - 1, start + 1, mid);
           recursion(rec - 1, mid + 2, finish);
+        } else {
         }
-        else {
-
-        }
-      }
+      };
 
       recursion(this.fractalDepth, 1, this.fractalNum - 1);
-    }
+    };
 
     buildFractal();
-
   }
 
   render(camera) {
     this.background.render(camera);
-    
+
     for (let i = 0; i < this.numOfStars; i++) {
       this.starArray[i].render(camera);
     }
-    
+
     for (let j = 1; j < this.fractalNum; j++) {
       this.fractalArray[j].render(camera);
     }
@@ -588,14 +631,19 @@ export default class Assignment4 extends cs380.BaseApp {
       width,
       height,
       vec3.fromValues(0.0, 0.75, 4.0), //translation
-      vec3.fromValues(5.0, 5.0, 5.0)   //scale
-    ); 
+      vec3.fromValues(5.0, 5.0, 5.0) //scale
+    );
 
     // create camera effect 1
     this.camEffect1 = new Pip1();
     this.thingsToClear.push(this.camEffect1);
-    await this.camEffect1.initialize(width, height, vec3.fromValues(0, 0, 0,), vec3.fromValues(1, 1, 1));
-    
+    await this.camEffect1.initialize(
+      width,
+      height,
+      vec3.fromValues(0, 0, 0),
+      vec3.fromValues(2, 2, 2)
+    );
+
     this.animatedBackground = new AnimatedBackground();
     await this.animatedBackground.initialize();
 
@@ -1450,13 +1498,17 @@ export default class Assignment4 extends cs380.BaseApp {
         (-Math.PI * dt) / 3
       );
     }
-    
+
     for (let k = 0; k < this.animatedBackground.numOfStars; k++) {
       const T1 = this.animatedBackground.starArray[k].transform;
       quat.rotateZ(T1.localRotation, T1.localRotation, Math.PI * dt);
-      vec3.set(T1.localPosition, T1.localPosition[0], T1.localPosition[1] - 0.3 * dt, 1);
+      vec3.set(
+        T1.localPosition,
+        T1.localPosition[0],
+        T1.localPosition[1] - 0.3 * dt,
+        1
+      );
     }
-    
 
     // OPTIONAL: render PickableObject to the picking buffer here
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingBuffer.fbo);
@@ -1492,16 +1544,16 @@ export default class Assignment4 extends cs380.BaseApp {
     }
 
     // Render effect-applied scene to the screen
+    this.renderImage(this.camEffect1.framebuffer.fbo);
+    this.renderImage(this.picture.framebuffer.fbo, true); //animated background
     this.renderImage(null);
-    this.renderImage(this.picture.framebuffer.fbo, null, null, true); //animated background
-    this.renderImage(this.camEffect1.framebuffer.fbo, null, null, true);
 
     // Photos are rendered at the very last
     this.photo.update(elapsed);
     this.photo.render(this.camera);
   }
 
-  renderScene() {
+  renderScene(background) {
     // TODO: render scene *without* any effect
     // It would consist of every render(...) calls of objects in the scene
     /* Example code
@@ -1510,48 +1562,52 @@ export default class Assignment4 extends cs380.BaseApp {
     this.avatar.render(this.camera);
     ...
     */
-    this.skybox.render(this.camera);
-    this.picture.render(this.camera);
+    if (background) {
+      this.animatedBackground.render(this.camera);
+    } else {
+      this.skybox.render(this.camera);
+      this.picture.render(this.camera);
 
-    this.body.render(this.camera);
-    this.head.render(this.camera);
-    this.rightShoulder.render(this.camera);
-    this.leftShoulder.render(this.camera);
-    this.rightUpperArm.render(this.camera);
-    this.leftUpperArm.render(this.camera);
-    this.rightArmJoint.render(this.camera);
-    this.leftArmJoint.render(this.camera);
-    this.rightLowerArm.render(this.camera);
-    this.leftLowerArm.render(this.camera);
-    this.rightHand.render(this.camera);
-    this.leftHand.render(this.camera);
-    this.rightHip.render(this.camera);
-    this.leftHip.render(this.camera);
-    this.rightUpperLeg.render(this.camera);
-    this.leftUpperLeg.render(this.camera);
-    this.rightLegJoint.render(this.camera);
-    this.leftLegJoint.render(this.camera);
-    this.rightLowerLeg.render(this.camera);
-    this.leftLowerLeg.render(this.camera);
-    this.leftFoot.render(this.camera);
-    this.rightFoot.render(this.camera);
+      this.body.render(this.camera);
+      this.head.render(this.camera);
+      this.rightShoulder.render(this.camera);
+      this.leftShoulder.render(this.camera);
+      this.rightUpperArm.render(this.camera);
+      this.leftUpperArm.render(this.camera);
+      this.rightArmJoint.render(this.camera);
+      this.leftArmJoint.render(this.camera);
+      this.rightLowerArm.render(this.camera);
+      this.leftLowerArm.render(this.camera);
+      this.rightHand.render(this.camera);
+      this.leftHand.render(this.camera);
+      this.rightHip.render(this.camera);
+      this.leftHip.render(this.camera);
+      this.rightUpperLeg.render(this.camera);
+      this.leftUpperLeg.render(this.camera);
+      this.rightLegJoint.render(this.camera);
+      this.leftLegJoint.render(this.camera);
+      this.rightLowerLeg.render(this.camera);
+      this.leftLowerLeg.render(this.camera);
+      this.leftFoot.render(this.camera);
+      this.rightFoot.render(this.camera);
 
-    this.eye1.render(this.camera);
-    this.eye2.render(this.camera);
-    this.mouth.render(this.camera);
+      this.eye1.render(this.camera);
+      this.eye2.render(this.camera);
+      this.mouth.render(this.camera);
 
-    this.background.render(this.camera);
-    this.floor.render(this.camera);
+      this.background.render(this.camera);
+      this.floor.render(this.camera);
 
-    this.cube1.render(this.camera);
-    this.cube2.render(this.camera);
+      this.cube1.render(this.camera);
+      this.cube2.render(this.camera);
 
-    this.pillar1.render(this.camera);
-    this.pillar2.render(this.camera);
-    this.pillar3.render(this.camera);
+      this.pillar1.render(this.camera);
+      this.pillar2.render(this.camera);
+      this.pillar3.render(this.camera);
+    }
   }
 
-  renderImage(fbo = null, width = null, height = null, background = false) {
+  renderImage(fbo = null, background = false, width = null, height = null) {
     // Parameters:
     //  * fbo: Target framebuffer object, default is to the canvas
     //  * width: Width of the target framebuffer, default is canvas'
@@ -1568,16 +1624,14 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LESS);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-      if(background) {
-        //this.skybox.render(this.camera);
+      /*
+      if (background) {
         this.animatedBackground.render(this.camera);
-      }
-      else {
+      } else {
         this.renderScene();
       }
-
-      //this.renderScene();
+      */
+      this.renderScene(background);
     } else {
       // TODO: render the scene with some camera effect to the target framebuffer object (fbo)
       // Write at least one camera effect shader, which takes a rendered texture and draws modified version of the given texture
@@ -1595,7 +1649,7 @@ export default class Assignment4 extends cs380.BaseApp {
 
       // TODO: Remove the following line after you implemented.
       // (and please, remove any console.log(..) within the update loop from your submission)
-      console.log("TODO: camera effect (" + this.camereEffect + ")");
+      //console.log("TODO: camera effect (" + this.camereEffect + ")");
 
       // Below codes will do no effectl it just renders the scene. You may (should?) delete this.
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
@@ -1606,12 +1660,8 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.depthFunc(gl.LESS);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      if(background) {
-        this.animatedBackground.render(this.camera);
-      }
-      else {
-        this.renderScene();
-      }
+      this.renderScene(background);
+      this.camEffect1.render(this.camera);
     }
   }
 }
