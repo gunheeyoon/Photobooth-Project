@@ -15,7 +15,6 @@ import Assignment1 from "./modules/assignments/assignment1.js";
 import Assignment2 from "./modules/assignments/assignment2.js";
 import Assignment3 from "./modules/assignments/assignment3.js";
 import Assignment4 from "./modules/assignments/assignment4.js";
-import Assignment11 from "./modules/assignments/assignment11.js";
 
 /*
     WebGL app list whose entries are shown above gl canvas.
@@ -83,10 +82,6 @@ const apps = {
     app: Assignment4,
     title: "Assignment 4",
   },
-  assignment11: {
-    app: Assignment11, 
-    title: "Assignment 11"
-  }
 };
 
 // Key of the very first app once you access localhost:8000

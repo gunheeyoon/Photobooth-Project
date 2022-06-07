@@ -1653,7 +1653,7 @@ export default class Assignment4 extends cs380.BaseApp {
     }
 
     // Render effect-applied scene to the screen
-    this.renderImage(this.picture.framebuffer.fbo, true); //animated background
+    //this.renderImage(this.picture.framebuffer.fbo, true); //animated background
     this.renderImage(this.camEffect1.framebuffer.fbo);
     this.renderImage(this.camEffect2.framebuffer.fbo);
     this.renderImage(this.camEffect3.framebuffer.fbo);
@@ -1728,6 +1728,16 @@ export default class Assignment4 extends cs380.BaseApp {
     if (!height) height = this.height;
     if (this.camereEffect == "none") {
       // no camera effect - render directly to the scene
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.picture.framebuffer.fbo);
+      gl.viewport(0, 0, width, height);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      this.renderScene(true);
+
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
       gl.viewport(0, 0, width, height);
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -1736,7 +1746,7 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.depthFunc(gl.LESS);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      this.renderScene(background);
+      this.renderScene(false);
     } else if (this.camereEffect == "my-effect") {
       // TODO: render the scene with some camera effect to the target framebuffer object (fbo)
       // Write at least one camera effect shader, which takes a rendered texture and draws modified version of the given texture

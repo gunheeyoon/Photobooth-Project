@@ -30,17 +30,10 @@ void pixels_3by3(inout vec4 n[9], sampler2D tex, vec2 coord)
 void main() {
   vec4 n[9];
 	pixels_3by3(n, mainTexture, uv);
-
-	//TODO: calculate magnitude of sobel gradient
-  	//vec4 grad_x = "pixel value gradient of x-axis"
+	
 	vec4 grad = n[0] + (2.0 * n[3]) + n[6] + 2.0 * n[1] + 4.0 * n[4] + 2.0 * n[7] + n[2] + (2.0 * n[5]) + n[8];
-  	//vec4 grad_y = "pixel value gradient of y-axis"
-	
 	grad = 0.111 * grad;
-
-	//vec4 grad_mag = vec4(1, 0, 0, 1);
-	vec4 grad_mag = 1.0 - grad; //put "magnitude of gradient" to grad_mag correctly.
-	
+	vec4 grad_mag = 1.0 - grad;
   output_color = vec4(1.0 - grad_mag.rgb, 1.0);
 }
 
