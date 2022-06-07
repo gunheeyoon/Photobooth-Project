@@ -14,6 +14,8 @@ import { PipShader } from "../pip_shader.js";
 import { BlurShader } from "../blur_shader.js";
 import { SolidShader } from "../solid_shader.js";
 import { SimpleOrbitControl } from "../cs380/utils.js";
+import { InversionShader } from "../inversion_shader.js";
+import { GrayShader } from "../gray_shader.js";
 
 class TextureShader extends cs380.BaseShader {
   static get source() {
@@ -108,6 +110,8 @@ class Framebuffer {
 class AnimatedBackground {
   async initialize() {
     // gradient background
+    this.thingsToClear = [];
+
     this.mesh = new cs380.Mesh();
 
     this.mesh.addAttribute(3); //position
@@ -168,6 +172,7 @@ class AnimatedBackground {
       vec3.set(fractal1.transform.localPosition, x, y, 1);
 
       this.starArray.push(fractal1);
+      //this.thingsToClear.push(fractal1);
     }
 
     // fractal
@@ -217,6 +222,7 @@ class AnimatedBackground {
         );
         fractal.uniforms.mainColor = [206 / 255, 222 / 255, 60 / 255];
         this.fractalArray.push(fractal);
+        //this.thingsToClear.push(fractal);
       }
 
       const recursion = (rec, start, finish) => {
@@ -264,6 +270,14 @@ class AnimatedBackground {
     };
 
     buildFractal();
+
+    this.thingsToClear.push(
+      this.mesh,
+      this.shader,
+      this.fractalShader,
+      this.fractalMesh1,
+      this.fractalMesh2
+    );
   }
 
   render(camera) {
@@ -275,6 +289,11 @@ class AnimatedBackground {
 
     for (let j = 1; j < this.fractalNum; j++) {
       this.fractalArray[j].render(camera);
+    }
+  }
+  finalize() {
+    for (const thing of this.thingsToClear) {
+      thing.finalize();
     }
   }
 }
@@ -326,6 +345,82 @@ class Pip1 {
     const planeMeshData = cs380.primitives.generatePlane(1, 1);
     const planeMesh = cs380.Mesh.fromData(planeMeshData);
     const shader = await cs380.buildShader(BlurShader);
+
+    this.transform = new cs380.Transform();
+    quat.rotateY(this.transform.localRotation, quat.create(), Math.PI);
+
+    this.image = new cs380.RenderObject(planeMesh, shader);
+    this.image.uniforms.useScreenSpace = true;
+    this.image.uniforms.useColor = false;
+    this.image.uniforms.mainTexture = this.framebuffer.colorTexture;
+    this.image.uniforms.width = width;
+    this.image.uniforms.height = height;
+    this.image.transform.localPosition = trans;
+    this.image.transform.localScale = scale;
+    this.image.transform.setParent(this.transform);
+
+    this.thingsToClear = [shader, planeMesh, this.framebuffer];
+  }
+
+  render(camera) {
+    const prevDepthFunc = gl.getParameter(gl.DEPTH_FUNC);
+    gl.depthFunc(gl.ALWAYS);
+    this.image.render(camera);
+    gl.depthFunc(prevDepthFunc);
+  }
+  finalize() {
+    for (const thing of this.thingsToClear) {
+      thing.finalize();
+    }
+  }
+}
+
+class Pip2 {
+  async initialize(width, height, trans, scale) {
+    this.framebuffer = new Framebuffer();
+    this.framebuffer.initialize(width, height);
+
+    const planeMeshData = cs380.primitives.generatePlane(1, 1);
+    const planeMesh = cs380.Mesh.fromData(planeMeshData);
+    const shader = await cs380.buildShader(InversionShader);
+
+    this.transform = new cs380.Transform();
+    quat.rotateY(this.transform.localRotation, quat.create(), Math.PI);
+
+    this.image = new cs380.RenderObject(planeMesh, shader);
+    this.image.uniforms.useScreenSpace = true;
+    this.image.uniforms.useColor = false;
+    this.image.uniforms.mainTexture = this.framebuffer.colorTexture;
+    this.image.uniforms.width = width;
+    this.image.uniforms.height = height;
+    this.image.transform.localPosition = trans;
+    this.image.transform.localScale = scale;
+    this.image.transform.setParent(this.transform);
+
+    this.thingsToClear = [shader, planeMesh, this.framebuffer];
+  }
+
+  render(camera) {
+    const prevDepthFunc = gl.getParameter(gl.DEPTH_FUNC);
+    gl.depthFunc(gl.ALWAYS);
+    this.image.render(camera);
+    gl.depthFunc(prevDepthFunc);
+  }
+  finalize() {
+    for (const thing of this.thingsToClear) {
+      thing.finalize();
+    }
+  }
+}
+
+class Pip3 {
+  async initialize(width, height, trans, scale) {
+    this.framebuffer = new Framebuffer();
+    this.framebuffer.initialize(width, height);
+
+    const planeMeshData = cs380.primitives.generatePlane(1, 1);
+    const planeMesh = cs380.Mesh.fromData(planeMeshData);
+    const shader = await cs380.buildShader(GrayShader);
 
     this.transform = new cs380.Transform();
     quat.rotateY(this.transform.localRotation, quat.create(), Math.PI);
@@ -644,7 +739,28 @@ export default class Assignment4 extends cs380.BaseApp {
       vec3.fromValues(2, 2, 2)
     );
 
+    // create camera effect 2
+    this.camEffect2 = new Pip2();
+    this.thingsToClear.push(this.camEffect2);
+    await this.camEffect2.initialize(
+      width,
+      height,
+      vec3.fromValues(0, 0, 0),
+      vec3.fromValues(2, 2, 2)
+    );
+
+    // create camera effect 3
+    this.camEffect3 = new Pip3();
+    this.thingsToClear.push(this.camEffect3);
+    await this.camEffect3.initialize(
+      width,
+      height,
+      vec3.fromValues(0, 0, 0),
+      vec3.fromValues(2, 2, 2)
+    );
+
     this.animatedBackground = new AnimatedBackground();
+    this.thingsToClear.push(this.animatedBackground);
     await this.animatedBackground.initialize();
 
     // initialize objects
@@ -1203,7 +1319,9 @@ export default class Assignment4 extends cs380.BaseApp {
       <label for="setting-effect">Camera effect</label>
       <select id="setting-effect">
         <option value="none">None</option>
-        <option value="my-effect">My camera effect</option>
+        <option value="my-effect">blur</option>
+        <option value="inversion">color inversion</option>
+        <option value="gray">gray scale</option>
       </select> <br/>
 
       <!-- OPTIONAL: Add more UI elements here --> 
@@ -1522,14 +1640,6 @@ export default class Assignment4 extends cs380.BaseApp {
     /*
     this.body.renderPicking(this.camera);
     this.head.renderPicking(this.camera);
-    this.rightUpperArm.renderPicking(this.camera);
-    this.leftUpperArm.renderPicking(this.camera);
-    this.rightLowerArm.renderPicking(this.camera);
-    this.leftLowerArm.renderPicking(this.camera);
-    this.rightUpperLeg.renderPicking(this.camera);
-    this.leftUpperLeg.renderPicking(this.camera);
-    this.rightLowerLeg.renderPicking(this.camera);
-    this.leftLowerLeg.renderPicking(this.camera);
     */
 
     // Render effect-applied scene to framebuffer of the photo if shutter is pressed
@@ -1544,8 +1654,10 @@ export default class Assignment4 extends cs380.BaseApp {
     }
 
     // Render effect-applied scene to the screen
-    this.renderImage(this.camEffect1.framebuffer.fbo);
     this.renderImage(this.picture.framebuffer.fbo, true); //animated background
+    this.renderImage(this.camEffect1.framebuffer.fbo);
+    this.renderImage(this.camEffect2.framebuffer.fbo);
+    this.renderImage(this.camEffect3.framebuffer.fbo);
     this.renderImage(null);
 
     // Photos are rendered at the very last
@@ -1624,15 +1736,9 @@ export default class Assignment4 extends cs380.BaseApp {
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LESS);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      /*
-      if (background) {
-        this.animatedBackground.render(this.camera);
-      } else {
-        this.renderScene();
-      }
-      */
+
       this.renderScene(background);
-    } else {
+    } else if (this.camereEffect == "my-effect") {
       // TODO: render the scene with some camera effect to the target framebuffer object (fbo)
       // Write at least one camera effect shader, which takes a rendered texture and draws modified version of the given texture
       //
@@ -1652,6 +1758,16 @@ export default class Assignment4 extends cs380.BaseApp {
       //console.log("TODO: camera effect (" + this.camereEffect + ")");
 
       // Below codes will do no effectl it just renders the scene. You may (should?) delete this.
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.picture.framebuffer.fbo);
+      gl.viewport(0, 0, width, height);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      this.renderScene(true);
+
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
       gl.viewport(0, 0, width, height);
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -1662,6 +1778,48 @@ export default class Assignment4 extends cs380.BaseApp {
 
       this.renderScene(background);
       this.camEffect1.render(this.camera);
+    } else if (this.camereEffect == "inversion") {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.picture.framebuffer.fbo);
+      gl.viewport(0, 0, width, height);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      this.renderScene(true);
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.viewport(0, 0, width, height);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      this.renderScene(background);
+      this.camEffect2.render(this.camera);
+    } else {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.picture.framebuffer.fbo);
+      gl.viewport(0, 0, width, height);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      this.renderScene(true);
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.viewport(0, 0, width, height);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      this.renderScene(background);
+      this.camEffect3.render(this.camera);
     }
   }
 }

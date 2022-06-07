@@ -39,7 +39,7 @@ void main() {
 	grad = 0.111 * grad;
 
 	//vec4 grad_mag = vec4(1, 0, 0, 1);
-	vec4 grad_mag = 1.0 - grad; //put "magnitude of gradient" to grad_mag correctly.
+	vec4 grad_mag = n[4]; //put "magnitude of gradient" to grad_mag correctly.
 	
   output_color = vec4(1.0 - grad_mag.rgb, 1.0);
 }

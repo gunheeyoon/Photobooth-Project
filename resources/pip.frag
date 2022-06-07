@@ -35,7 +35,7 @@ void main() {
   	//vec4 grad_x = "pixel value gradient of x-axis"
   	//vec4 grad_y = "pixel value gradient of y-axis"
 	
-	vec4 grad_mag = 1.0-n[4]; //put "magnitude of gradient" to grad_mag correctly.
+	vec4 grad_mag = 1.0 - n[4]; //put "magnitude of gradient" to grad_mag correctly.
 	
   output_color = vec4(1.0 - grad_mag.rgb, 1.0);
 }
