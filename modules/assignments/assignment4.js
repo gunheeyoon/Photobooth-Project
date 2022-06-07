@@ -1637,10 +1637,9 @@ export default class Assignment4 extends cs380.BaseApp {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // renderPicking() here
-    /*
+
     this.body.renderPicking(this.camera);
     this.head.renderPicking(this.camera);
-    */
 
     // Render effect-applied scene to framebuffer of the photo if shutter is pressed
     if (this.shutterPressed) {
